@@ -3,20 +3,33 @@ package com.kidsafe.child.lock
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 
-data class LockRule(val category: String?, val minAge: Int?, val whitelist: Set<String>, val blacklist: Set<String>)
-
 class AppLockManager(private val pm: PackageManager) {
-    fun isAllowed(packageName: String, rule: LockRule, age: Int): Boolean {
-        if (rule.blacklist.contains(packageName)) return false
-        if (rule.whitelist.contains(packageName)) return true
-        if (rule.minAge != null && age < rule.minAge) return false
+    fun isAllowedWithConfig(packageName: String, config: LockConfig): Boolean {
+        val blacklist = toSet(config.blacklist)
+        val whitelist = toSet(config.whitelist)
+        if (blacklist.contains(packageName)) return false
+        if (whitelist.contains(packageName)) return true
         val info = pm.getApplicationInfo(packageName, 0)
         val cat = category(info)
-        if (rule.category != null && rule.category != cat) return false
+        val allowedCats = toSet(config.allowedCategories)
+        if (allowedCats.isNotEmpty() && !allowedCats.contains(cat)) return false
         return true
     }
 
+    private fun toSet(s: String): Set<String> = if (s.isBlank()) emptySet() else s.split(',').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+
     private fun category(info: ApplicationInfo): String {
-        return if ((info.flags and ApplicationInfo.FLAG_SYSTEM) != 0) "system" else "user"
+        return when (info.category) {
+            ApplicationInfo.CATEGORY_GAME -> "game"
+            ApplicationInfo.CATEGORY_PRODUCTIVITY -> "productivity"
+            ApplicationInfo.CATEGORY_SOCIAL -> "social"
+            ApplicationInfo.CATEGORY_NEWS -> "news"
+            ApplicationInfo.CATEGORY_AUDIO -> "audio"
+            ApplicationInfo.CATEGORY_VIDEO -> "video"
+            ApplicationInfo.CATEGORY_IMAGE -> "image"
+            ApplicationInfo.CATEGORY_MAPS -> "maps"
+            ApplicationInfo.CATEGORY_TEST -> "test"
+            else -> if ((info.flags and ApplicationInfo.FLAG_SYSTEM) != 0) "system" else "user"
+        }
     }
 }

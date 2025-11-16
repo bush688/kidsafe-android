@@ -20,6 +20,7 @@ fun PermissionGuides() {
     val context = LocalContext.current
     val usageOk = remember { mutableStateOf(UsageMonitor.hasAccess(context)) }
     val overlayOk = remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
     Column(modifier = Modifier.padding(12.dp)) {
         if (!usageOk.value) {
             Button(onClick = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("开启使用情况访问") }
@@ -28,5 +29,6 @@ fun PermissionGuides() {
             val pkg = context.packageName
             Button(onClick = { context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$pkg"))) }, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("允许显示在其他应用上层") }
         }
+        Button(onClick = { context.startActivity(accIntent) }, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("开启辅助功能服务") }
     }
 }

@@ -8,13 +8,16 @@ import com.kidsafe.child.db.AppUsage
 import com.kidsafe.child.db.AppUsageDao
 import com.kidsafe.child.rules.ScreenTimeRule
 import com.kidsafe.child.rules.ScreenTimeRuleDao
+import com.kidsafe.child.lock.LockConfig
+import com.kidsafe.child.lock.LockConfigDao
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 
-@Database(entities = [AppUsage::class, ScreenTimeRule::class], version = 2)
+@Database(entities = [AppUsage::class, ScreenTimeRule::class, LockConfig::class], version = 3)
 abstract class SecureDatabase : RoomDatabase() {
     abstract fun appUsageDao(): AppUsageDao
     abstract fun screenTimeRuleDao(): ScreenTimeRuleDao
+    abstract fun lockConfigDao(): LockConfigDao
 
     companion object {
         @Volatile private var instance: SecureDatabase? = null
