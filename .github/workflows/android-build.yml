@@ -20,12 +20,17 @@ jobs:
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses
       - run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-      - run: |
-          curl -L https://services.gradle.org/distributions/gradle-8.5-bin.zip -o gradle.zip
+      - name: Setup Gradle 8.2.1 and build
+        run: |
+          export GRADLE_VERSION=8.2.1
+          curl -L https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle.zip
           unzip -q gradle.zip
-          export PATH="$PWD/gradle-8.5/bin:$PATH"
+          export PATH="$PWD/gradle-${GRADLE_VERSION}/bin:$PATH"
+          gradle --version
           gradle wrapper
-          ./gradlew assembleDebug --stacktrace --info --no-daemon
+      - name: Assemble Debug APKs
+        run: |
+          ./gradlew :childapp:assembleDebug :parentapp:assembleDebug --stacktrace --info --no-daemon --warning-mode all
       - uses: actions/upload-artifact@v4
         with:
           name: childapp-debug
