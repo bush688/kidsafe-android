@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <permission android:name="com.kidsafe.permission.MANAGE_CHILD" android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -31,5 +32,10 @@
             </intent-filter>
             <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibility_service_config" />
         </service>
+        <receiver android:name=".RemoteConfigReceiver" android:exported="true" android:permission="com.kidsafe.permission.MANAGE_CHILD">
+            <intent-filter>
+                <action android:name="com.kidsafe.action.UPDATE_CONFIG" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
