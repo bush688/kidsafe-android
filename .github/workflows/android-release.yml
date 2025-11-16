@@ -17,15 +17,23 @@ jobs:
       - uses: android-actions/setup-android@v3
       - run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
       - run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+      - env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_B64" | base64 -d > keystore.jks
+          echo "KS_FILE=$PWD/keystore.jks" >> $GITHUB_ENV
+          echo "KS_PASS=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "KEY_PASS=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
       - run: |
           curl -L https://services.gradle.org/distributions/gradle-8.5-bin.zip -o gradle.zip
           unzip -q gradle.zip
           export PATH="$PWD/gradle-8.5/bin:$PATH"
-          gradle assembleDebug
+          gradle assembleRelease
       - run: |
           mkdir -p dist
-          cp childapp/build/outputs/apk/debug/*.apk dist/kidsafe-child-debug-${{ github.ref_name }}.apk
-          cp parentapp/build/outputs/apk/debug/*.apk dist/kidsafe-parent-debug-${{ github.ref_name }}.apk
+          cp childapp/build/outputs/apk/release/*.apk dist/kidsafe-child-release-${{ github.ref_name }}.apk
+          cp parentapp/build/outputs/apk/release/*.apk dist/kidsafe-parent-release-${{ github.ref_name }}.apk
       - uses: softprops/action-gh-release@v1
         with:
           files: dist/*.apk

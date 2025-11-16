@@ -16,6 +16,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val ksFile = System.getenv("KS_FILE")
+            val ksPass = System.getenv("KS_PASS")
+            val keyAlias = System.getenv("KEY_ALIAS")
+            val keyPass = System.getenv("KEY_PASS")
+            if (!ksFile.isNullOrBlank()) storeFile = file(ksFile)
+            if (!ksPass.isNullOrBlank()) storePassword = ksPass
+            if (!keyAlias.isNullOrBlank()) this.keyAlias = keyAlias
+            if (!keyPass.isNullOrBlank()) keyPassword = keyPass
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            isMinifyEnabled = false
+        }
+    }
+
     buildFeatures { compose = true }
     composeOptions { kotlinCompilerExtensionVersion = "1.5.11" }
 }
