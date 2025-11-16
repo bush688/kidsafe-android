@@ -75,5 +75,6 @@ fun HomeScreen(onParent: () -> Unit, speak: (String) -> Unit) {
             }
         }
         PermissionGuides()
+        KidsHomeGrid(onAction = { s -> speak(s) }, speak = speak)
     }
 }
