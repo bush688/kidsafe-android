@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import com.kidsafe.child.db.AppUsage
 import com.kidsafe.child.db.AppUsageDao
 import com.kidsafe.child.rules.ScreenTimeRuleDao
+import com.kidsafe.child.rules.TimeWindowDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -21,6 +22,14 @@ class MonitoringWorker(appContext: Context, params: WorkerParameters) : Coroutin
             r
         }
         if (total >= rule.dailyLimitMinutes) NotificationUtil.notifyTimeout(applicationContext, rule.dailyLimitMinutes)
+        val tw = db.timeWindowDao().get() ?: kotlin.run {
+            val r = com.kidsafe.child.rules.TimeWindow()
+            db.timeWindowDao().upsert(r)
+            r
+        }
+        val cal = java.util.Calendar.getInstance()
+        val minutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
+        if (minutes < tw.startMinutes || minutes > tw.endMinutes) NotificationUtil.notifyWindowBlocked(applicationContext)
         return Result.success()
     }
 

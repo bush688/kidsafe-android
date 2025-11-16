@@ -22,4 +22,10 @@ object NotificationUtil {
         val n = NotificationCompat.Builder(context, CHANNEL_ID).setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("使用超时").setContentText("已达到每日${minutes}分钟限制").setPriority(NotificationCompat.PRIORITY_HIGH).build()
         NotificationManagerCompat.from(context).notify(1001, n)
     }
+
+    fun notifyWindowBlocked(context: Context) {
+        ensureChannel(context)
+        val n = NotificationCompat.Builder(context, CHANNEL_ID).setSmallIcon(android.R.drawable.ic_dialog_alert).setContentTitle("当前时段不可用").setContentText("已超出允许使用时间段").setPriority(NotificationCompat.PRIORITY_HIGH).build()
+        NotificationManagerCompat.from(context).notify(1002, n)
+    }
 }

@@ -15,10 +15,13 @@ class RemoteConfigReceiver : BroadcastReceiver() {
         val cats = intent.getStringExtra("cats") ?: ""
         val white = intent.getStringExtra("white") ?: ""
         val black = intent.getStringExtra("black") ?: ""
+        val startMin = intent.getIntExtra("startMin", -1)
+        val endMin = intent.getIntExtra("endMin", -1)
         val db = SecureDatabase.get(context)
         GlobalScope.launch(Dispatchers.IO) {
             if (daily > 0) db.screenTimeRuleDao().upsert(ScreenTimeRule(dailyLimitMinutes = daily))
             db.lockConfigDao().upsert(LockConfig(allowedCategories = cats, whitelist = white, blacklist = black))
+            if (startMin >= 0 && endMin >= 0) db.timeWindowDao().upsert(com.kidsafe.child.rules.TimeWindow(startMinutes = startMin, endMinutes = endMin))
         }
     }
 }
