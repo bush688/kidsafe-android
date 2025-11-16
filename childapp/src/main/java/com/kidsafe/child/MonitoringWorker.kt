@@ -9,6 +9,7 @@ import com.kidsafe.child.rules.ScreenTimeRuleDao
 import com.kidsafe.child.rules.TimeWindowDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.kidsafe.child.analytics.UsageAggregator
 
 class MonitoringWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
@@ -34,18 +35,6 @@ class MonitoringWorker(appContext: Context, params: WorkerParameters) : Coroutin
     }
 
     private suspend fun aggregateTodayMinutes(dao: AppUsageDao): Int {
-        return withContext(Dispatchers.IO) {
-            val list = dao.latest(10000)
-            var minutes = 0
-            val stack = mutableMapOf<String, Long>()
-            list.asReversed().forEach { e ->
-                if (e.type == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) stack[e.packageName] = e.time
-                if (e.type == android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND) {
-                    val start = stack.remove(e.packageName)
-                    if (start != null && e.time > start) minutes += ((e.time - start) / 60000L).toInt()
-                }
-            }
-            minutes
-        }
+        return withContext(Dispatchers.IO) { UsageAggregator.aggregateMinutes(dao.latest(10000)) }
     }
 }
