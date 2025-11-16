@@ -1,0 +1,2 @@
+-keep class com.kidsafe.parent.** { *; }
+-dontwarn androidx.compose.**

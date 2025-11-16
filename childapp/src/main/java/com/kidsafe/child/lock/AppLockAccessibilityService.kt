@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityEvent
 import com.kidsafe.child.LockOverlayActivity
 import com.kidsafe.child.SecureDatabase
 import java.util.Calendar
+import com.kidsafe.child.rules.TimeRules
 
 class AppLockAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -17,7 +18,7 @@ class AppLockAccessibilityService : AccessibilityService() {
             val allowed = AppLockManager(packageManager).isAllowedWithConfig(pkg, cfg)
             val now = Calendar.getInstance()
             val minutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-            val inWindow = minutes in tw.startMinutes..tw.endMinutes
+            val inWindow = TimeRules.inWindow(minutes, tw)
             if ((!allowed || !inWindow) && pkg != packageName) {
                 val intent = Intent(this, LockOverlayActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

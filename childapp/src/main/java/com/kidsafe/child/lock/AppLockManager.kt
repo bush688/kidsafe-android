@@ -9,8 +9,8 @@ class AppLockManager(private val pm: PackageManager) {
         val whitelist = toSet(config.whitelist)
         if (blacklist.contains(packageName)) return false
         if (whitelist.contains(packageName)) return true
-        val info = pm.getApplicationInfo(packageName, 0)
-        val cat = category(info)
+        val info = try { pm.getApplicationInfo(packageName, 0) } catch (e: Exception) { null }
+        val cat = if (info != null) category(info) else "user"
         val allowedCats = toSet(config.allowedCategories)
         if (allowedCats.isNotEmpty() && !allowedCats.contains(cat)) return false
         return true

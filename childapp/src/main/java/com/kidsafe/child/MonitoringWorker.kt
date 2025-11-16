@@ -10,6 +10,7 @@ import com.kidsafe.child.rules.TimeWindowDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.kidsafe.child.analytics.UsageAggregator
+import com.kidsafe.child.rules.TimeRules
 
 class MonitoringWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
@@ -30,7 +31,7 @@ class MonitoringWorker(appContext: Context, params: WorkerParameters) : Coroutin
         }
         val cal = java.util.Calendar.getInstance()
         val minutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
-        if (minutes < tw.startMinutes || minutes > tw.endMinutes) NotificationUtil.notifyWindowBlocked(applicationContext)
+        if (!TimeRules.inWindow(minutes, tw)) NotificationUtil.notifyWindowBlocked(applicationContext)
         return Result.success()
     }
 

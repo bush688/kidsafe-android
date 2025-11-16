@@ -1,0 +1,8 @@
+-keep class com.kidsafe.child.** { *; }
+-keep class com.kidsafe.child.db.** { *; }
+-keep class net.sqlcipher.** { *; }
+-keep class androidx.room.** { *; }
+-keep class androidx.work.** { *; }
+-dontwarn net.sqlcipher.**
+-dontwarn androidx.room.**
+-dontwarn androidx.work.**
