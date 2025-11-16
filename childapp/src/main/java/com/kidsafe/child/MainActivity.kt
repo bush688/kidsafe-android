@@ -2,7 +2,7 @@ package com.kidsafe.child
 
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import java.util.Locale
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private var tts: TextToSpeech? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,5 +74,6 @@ fun HomeScreen(onParent: () -> Unit, speak: (String) -> Unit) {
                 Text(text = "家长", fontSize = 28.sp, modifier = Modifier.padding(start = 16.dp))
             }
         }
+        PermissionGuides()
     }
 }
