@@ -22,6 +22,7 @@ import com.kidsafe.child.rules.ScreenTimeRule
 import com.kidsafe.child.lock.LockConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.kidsafe.child.analytics.UsageAggregator
 
 @Composable
 fun ParentSettingsScreen(onBack: () -> Unit) {
@@ -83,8 +84,7 @@ fun UsageReport() {
     }
     Column(modifier = Modifier.padding(top = 24.dp)) {
         Text(text = "使用报告", style = MaterialTheme.typography.headlineLarge)
-        list.value.forEach { e ->
-            Text(text = e.packageName + " " + java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date(e.time)), modifier = Modifier.padding(top = 8.dp))
-        }
+        val agg = UsageAggregator.aggregateByPackage(list.value)
+        UsageChart(data = agg)
     }
 }
