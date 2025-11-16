@@ -45,6 +45,7 @@ fun ParentSettingsScreen(onBack: () -> Unit) {
     val cats = remember { mutableStateOf("") }
     val white = remember { mutableStateOf("") }
     val black = remember { mutableStateOf("") }
+    val age = remember { mutableStateOf("8") }
     LaunchedEffect(Unit) {
         val db = SecureDatabase.get(context)
         val rule = withContext(Dispatchers.IO) { db.screenTimeRuleDao().get() } ?: ScreenTimeRule()
@@ -53,6 +54,8 @@ fun ParentSettingsScreen(onBack: () -> Unit) {
         cats.value = cfg.allowedCategories
         white.value = cfg.whitelist
         black.value = cfg.blacklist
+        val prof = withContext(Dispatchers.IO) { db.childProfileDao().get() } ?: com.kidsafe.child.profile.ChildProfile()
+        age.value = prof.age.toString()
     }
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         Text(text = "家长控制中心", style = MaterialTheme.typography.headlineLarge)
@@ -60,12 +63,15 @@ fun ParentSettingsScreen(onBack: () -> Unit) {
         OutlinedTextField(value = cats.value, onValueChange = { cats.value = it }, label = { Text("允许类别(逗号分隔)") }, modifier = Modifier.padding(top = 16.dp))
         OutlinedTextField(value = white.value, onValueChange = { white.value = it }, label = { Text("白名单包名(逗号分隔)") }, modifier = Modifier.padding(top = 16.dp))
         OutlinedTextField(value = black.value, onValueChange = { black.value = it }, label = { Text("黑名单包名(逗号分隔)") }, modifier = Modifier.padding(top = 16.dp))
+        OutlinedTextField(value = age.value, onValueChange = { age.value = it }, label = { Text("儿童年龄") }, modifier = Modifier.padding(top = 16.dp))
         Button(onClick = {
             val db = SecureDatabase.get(context)
             val d = daily.value.toIntOrNull() ?: 60
             kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
                 db.screenTimeRuleDao().upsert(ScreenTimeRule(dailyLimitMinutes = d))
                 db.lockConfigDao().upsert(LockConfig(allowedCategories = cats.value, whitelist = white.value, blacklist = black.value))
+                val a = age.value.toIntOrNull() ?: 8
+                db.childProfileDao().upsert(com.kidsafe.child.profile.ChildProfile(age = a))
             }
         }, modifier = Modifier.padding(top = 24.dp)) { Text("保存") }
         Button(onClick = onBack, modifier = Modifier.padding(top = 12.dp)) { Text("返回") }

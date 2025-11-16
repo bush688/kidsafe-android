@@ -35,6 +35,7 @@ fun ParentHome() {
     val black = remember { mutableStateOf("") }
     val start = remember { mutableStateOf("08:00") }
     val end = remember { mutableStateOf("20:00") }
+    val age = remember { mutableStateOf("8") }
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         Text(text = "家长控制端", style = MaterialTheme.typography.headlineLarge)
         OutlinedTextField(value = daily.value, onValueChange = { daily.value = it }, label = { Text("每日总时长(分钟)") }, modifier = Modifier.padding(top = 16.dp))
@@ -43,6 +44,7 @@ fun ParentHome() {
         OutlinedTextField(value = black.value, onValueChange = { black.value = it }, label = { Text("黑名单包名(逗号分隔)") }, modifier = Modifier.padding(top = 16.dp))
         OutlinedTextField(value = start.value, onValueChange = { start.value = it }, label = { Text("可用开始时间(HH:mm)") }, modifier = Modifier.padding(top = 16.dp))
         OutlinedTextField(value = end.value, onValueChange = { end.value = it }, label = { Text("可用结束时间(HH:mm)") }, modifier = Modifier.padding(top = 16.dp))
+        OutlinedTextField(value = age.value, onValueChange = { age.value = it }, label = { Text("儿童年龄") }, modifier = Modifier.padding(top = 16.dp))
         Button(onClick = {
             val i = Intent("com.kidsafe.action.UPDATE_CONFIG")
             i.setPackage("com.kidsafe.child")
@@ -56,6 +58,8 @@ fun ParentHome() {
             val e = runCatching { LocalTime.parse(end.value, fmt) }.getOrNull() ?: LocalTime.of(20, 0)
             i.putExtra("startMin", s.hour * 60 + s.minute)
             i.putExtra("endMin", e.hour * 60 + e.minute)
+            val a = age.value.toIntOrNull() ?: 8
+            i.putExtra("age", a)
             getApplicationContext().sendBroadcast(i, "com.kidsafe.permission.MANAGE_CHILD")
         }, modifier = Modifier.padding(top = 24.dp)) { Text("同步到儿童端") }
     }

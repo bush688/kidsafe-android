@@ -4,11 +4,12 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 
 class AppLockManager(private val pm: PackageManager) {
-    fun isAllowedWithConfig(packageName: String, config: LockConfig): Boolean {
+    fun isAllowedWithConfig(packageName: String, config: LockConfig, childAge: Int): Boolean {
         val blacklist = toSet(config.blacklist)
         val whitelist = toSet(config.whitelist)
         if (blacklist.contains(packageName)) return false
         if (whitelist.contains(packageName)) return true
+        if (config.minAge > 0 && childAge < config.minAge) return false
         val info = try { pm.getApplicationInfo(packageName, 0) } catch (e: Exception) { null }
         val cat = if (info != null) category(info) else "user"
         val allowedCats = toSet(config.allowedCategories)

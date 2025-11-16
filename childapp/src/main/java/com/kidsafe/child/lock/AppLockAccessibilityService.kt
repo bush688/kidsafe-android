@@ -14,8 +14,9 @@ class AppLockAccessibilityService : AccessibilityService() {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             val db = SecureDatabase.get(this)
             val cfg = db.lockConfigDao().get() ?: com.kidsafe.child.lock.LockConfig()
+            val profile = db.childProfileDao().get() ?: com.kidsafe.child.profile.ChildProfile()
             val tw = db.timeWindowDao().get() ?: com.kidsafe.child.rules.TimeWindow()
-            val allowed = AppLockManager(packageManager).isAllowedWithConfig(pkg, cfg)
+            val allowed = AppLockManager(packageManager).isAllowedWithConfig(pkg, cfg, profile.age)
             val now = Calendar.getInstance()
             val minutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
             val inWindow = TimeRules.inWindow(minutes, tw)
