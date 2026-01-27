@@ -1,0 +1,268 @@
+<resources>
+    <string name="app_name">仪表计算器</string>
+    <string name="zero_voltage_title">零位电压设置</string>
+    <string name="zero_voltage_preset">预设零位电压</string>
+    <string name="zero_voltage_custom">自定义零位电压</string>
+    <string name="zero_voltage_range_error">零位电压范围：0–10 V</string>
+    <string name="zero_voltage_current">当前零位电压：%1$s V</string>
+    <string name="zero_voltage_copy_line">零位电压</string>
+    <string name="sensitivity_label">灵敏度 M：%1$s V/mm</string>
+    <string name="setting_mode">设置方式</string>
+    <string name="preset_mode">预设</string>
+    <string name="custom_mode">自定义</string>
+
+    <string name="forward_title">正向计算（窜量→电压）</string>
+    <string name="reverse_title">反向计算（电压→窜量）</string>
+
+    <string name="input_label">窜量</string>
+    <string name="voltage_input_label">电压</string>
+    <string name="calculate">计算</string>
+    <string name="reset">重置</string>
+    <string name="copy">复制结果</string>
+    <string name="far_end">最远端电压</string>
+    <string name="near_end">最近端电压</string>
+    <string name="reverse_result_label">窜量</string>
+    <string name="reverse_side_label">推算端位：%1$s</string>
+    <string name="side_far">最远端</string>
+    <string name="side_near">最近端</string>
+    <string name="side_zero">零位</string>
+    <string name="help">帮助</string>
+    <string name="history">历史记录</string>
+    <string name="clear_history">清空历史</string>
+    <string name="unit_label">单位</string>
+    <string name="unit_v">V</string>
+    <string name="unit_mm">mm</string>
+    <string name="unit_dao">道</string>
+    <string name="invalid_input">请输入有效数字</string>
+    <string name="negative_input">窜量不能为负数</string>
+    <string name="negative_voltage">电压不能为负数</string>
+    <string name="copied">已复制到剪贴板</string>
+    <string name="help_title">帮助与说明</string>
+    <string name="help_text" formatted="false">1) 热电偶（ITS-90）\n- E0(t)：分度表给出相对 0℃ 的热电势（mV）。\n- 不启用冷端补偿：E = E0(Thot)\n- 启用冷端补偿（冷端 Tcj）：E = E0(Thot) - E0(Tcj)\n- 反算：Thot = E0⁻¹(E + E0(Tcj))\n\n2) 热电阻\n- R0(t)：分度表给出元件电阻（Ω）。\n- 引线补偿（每根引线电阻为 r）：\n  二线制：Rmeas = R0 + 2r\n  三线制：Rmeas = R0 + r（假设三线等阻）\n  四线制：Rmeas = R0\n- 反算：先扣除引线补偿，再按分度表反算温度。\n\n3) 探头（窜量/电压）\n- 正向：V远 = V0 + (C/2)×M；V近 = V0 - (C/2)×M\n- 反向：C = 2×|V - V0|/M，并给出端位（远端/近端/零位）\n- 单位：1道 = 0.01mm\n\n4) 差压液位计\n- 基本公式：P = ρ×g×h，g = 9.81 m/s²\n- 量程：SPAN = URV - LRV\n- 密度+高度：SPAN = ρ介质×g×H；LRV = ±(ρ介质×g×h0 + ρ硅油×g×hOil)\n  默认使用负迁移（LRV 为负），可切换为正迁移\n- 量程反算：已知 LRV0/URV0 与真实液位%，输入当前差压 ΔPnow\n  新 LRV = ΔPnow - (液位%/100)×SPAN，新 URV = 新 LRV + SPAN（SPAN 不变）\n- 单位：支持 kPa / Pa / bar / mmH₂O 自动换算\n\n5) 计算精度\n- 热电偶/热电阻：分度表相邻点线性插值，显示保留 4 位小数。\n- 探头：电压保留 2 位小数，窜量保留 3 位小数。\n\n6) 数据来源\n- 分度表数据来自 SADI《热电阻、热电偶双向分度表查询工具（ITS-90）》内置数据库（含 Pt10/Pt100/Pt500/Pt800/Pt1000、Cu10/Cu50/Cu100、G53、BA1、BA2，以及 R/S/N/B/K/E/J/T）。\n- 热电偶冷端补偿原理参考 Fluke 热电偶电压-温度转换器说明。\n- Pt100/Pt1000 等电阻温度计换算原理参考 Therma GmbH PT100/PT1000 计算器说明。\n- 差压液位计零点迁移计算方法参考相关技术资料（双法兰毛细管硅油静压差）。</string>
+    <string name="close">关闭</string>
+    <string name="copyright_maker">制作：bush688</string>
+    <string name="contact_email">联系方式：bush688@gmail.com</string>
+    <string name="empty_placeholder">—</string>
+
+    <string name="tab_thermocouple">热电偶</string>
+    <string name="tab_rtd">热电阻</string>
+    <string name="tab_probe">探头</string>
+    <string name="tab_dp_level">液位计</string>
+
+    <string name="home_title">功能导航</string>
+    <string name="home_hint">点击一个功能进入计算界面</string>
+    <string name="invalid_module">功能模块加载失败</string>
+    <string name="back">返回</string>
+
+    <string name="feature_thermocouple">热电偶计算</string>
+    <string name="feature_rtd">热电阻计算</string>
+    <string name="feature_probe">探头窜量/电压</string>
+    <string name="feature_dp_level">差压液位计</string>
+    <string name="feature_cable_drop">电缆线阻/压降</string>
+
+    <string name="tab_cable_resistance">线阻</string>
+    <string name="tab_cable_drop">电压降</string>
+
+    <string name="cable_title">电缆线阻与电压降计算</string>
+    <string name="material_copper">铜</string>
+    <string name="material_aluminum">铝</string>
+    <string name="hint_material_copper">电阻率较低</string>
+    <string name="hint_material_aluminum">电阻率较高</string>
+
+    <string name="input_area">截面积</string>
+    <string name="input_awg">线规</string>
+    <string name="hint_area_mm2">按 mm² 输入</string>
+    <string name="hint_area_awg">按 AWG 选择</string>
+    <string name="hint_area_common">常用：0.75/1/1.5/2.5/4/6/10/16/25/35…</string>
+    <string name="hint_awg_area">换算截面积：%1$s mm²</string>
+    <string name="standard">标准</string>
+    <string name="manual">手动</string>
+
+    <string name="input_length_oneway">单程长度</string>
+    <string name="hint_length_oneway">按单程输入，计算时自动考虑回路</string>
+    <string name="hint_cable_temperature">导体温度（用于温度修正）</string>
+
+    <string name="input_current">负载电流</string>
+    <string name="input_voltage">电源电压</string>
+    <string name="unit_a">A</string>
+
+    <string name="hint_wiring_drop">单相/三相不同接线的压降公式不同</string>
+
+    <string name="circuit_dc">直流</string>
+    <string name="circuit_ac">交流</string>
+    <string name="hint_circuit_dc">仅考虑电阻压降</string>
+    <string name="hint_circuit_ac">考虑功率因数与感抗</string>
+    <string name="input_power_factor">功率因数 cosφ</string>
+    <string name="input_frequency">频率</string>
+    <string name="input_inductance_per_km">电感(每千米)</string>
+    <string name="hint_inductance_per_km">用于计算感抗 X_L = 2πfL（可填 0 忽略）</string>
+
+    <string name="input_limit_percent">允许压降</string>
+    <string name="hint_limit_3">常用：照明/末端回路</string>
+    <string name="hint_limit_5">常用：动力/一般回路</string>
+    <string name="hint_limit_custom">自定义阈值</string>
+    <string name="custom">自定义</string>
+    <string name="ok">合格</string>
+    <string name="exceed">超限</string>
+
+    <string name="cable_resistance_result">单根导体电阻：%1$s Ω\n电阻(每千米)：%2$s Ω/km</string>
+    <string name="cable_drop_result_dc">模型：直流(DC)\n单根导体电阻：%1$s Ω\n回路电阻：%2$s Ω\n电压降：%3$s V\n压降百分比：%4$s %%\n结论：%5$s</string>
+    <string name="cable_drop_result_ac">模型：交流(AC)\n单根导体电阻：%1$s Ω\n单根导体感抗：%2$s Ω\n回路电阻：%3$s Ω\n回路感抗：%4$s Ω\n回路阻抗：%5$s Ω\n电压降：%6$s V\n压降百分比：%7$s %%\n结论：%8$s</string>
+
+    <string name="scenario">场景</string>
+    <string name="input_scenario_name">场景名称</string>
+    <string name="hint_scenario_name">用于保存/覆盖常用参数</string>
+    <string name="load_preset">加载场景</string>
+    <string name="hint_load_preset">选择后会自动填充参数</string>
+    <string name="save_preset">保存场景</string>
+    <string name="name_required">请先填写场景名称</string>
+    <string name="saved">已保存</string>
+    <string name="deleted">已删除</string>
+    <string name="delete">删除</string>
+    <string name="none">无</string>
+
+    <string name="export_pdf">导出PDF</string>
+    <string name="export_text">导出文本</string>
+    <string name="export_failed">导出失败</string>
+    <string name="tc_title">热电偶换算（ITS-90）</string>
+    <string name="rtd_title">热电阻换算</string>
+    <string name="sensor_type">类型</string>
+    <string name="mode_temp_to_mv">温度→mV</string>
+    <string name="mode_mv_to_temp">mV→温度</string>
+    <string name="mode_temp_to_r">温度→Ω</string>
+    <string name="mode_r_to_temp">Ω→温度</string>
+    <string name="cjc_label">冷端补偿</string>
+    <string name="enabled">启用</string>
+    <string name="disabled">关闭</string>
+    <string name="input_temperature">温度</string>
+    <string name="input_cj_temperature">冷端温度</string>
+    <string name="input_mv">热电势</string>
+    <string name="input_resistance">电阻</string>
+    <string name="output_label">输出</string>
+    <string name="unit_c">℃</string>
+    <string name="unit_mv">mV</string>
+    <string name="out_of_range">输入超出该分度号有效范围</string>
+    <string name="out_of_range_with_hint">输入超出有效范围：%1$s</string>
+    <string name="calc_failed">计算失败，请检查输入</string>
+    <string name="valid_temp_range">温度范围：%1$s–%2$s ℃</string>
+    <string name="valid_mv_range">mV范围：%1$s–%2$s mV</string>
+    <string name="valid_ohm_range">Ω范围：%1$s–%2$s Ω</string>
+    <string name="tc_label">热电偶 %1$s</string>
+    <string name="rtd_label">热电阻 %1$s</string>
+    <string name="wiring">接线方式</string>
+    <string name="lead_resistance">引线电阻（每根）</string>
+    <string name="cj_short">冷端 %1$s℃</string>
+
+    <string name="hint_tc_type">选择热电偶分度号（K/R/S/N/B/E/J/T）</string>
+    <string name="hint_rtd_type">选择热电阻分度号（Pt/Cu/BA/G53）</string>
+    <string name="hint_mode_temp_to_mv">输入温度，计算热电势</string>
+    <string name="hint_mode_mv_to_temp">输入热电势，反算温度</string>
+    <string name="hint_mode_temp_to_r">输入温度，计算电阻</string>
+    <string name="hint_mode_r_to_temp">输入电阻，反算温度</string>
+    <string name="hint_cjc_on">使用冷端温度补偿到 0℃</string>
+    <string name="hint_cjc_off">不做冷端补偿（默认按 0℃）</string>
+    <string name="hint_calculate">执行计算并写入历史</string>
+    <string name="hint_copy">复制输出值</string>
+    <string name="hint_wiring">二/三/四线制会影响引线补偿</string>
+    <string name="hint_lead_resistance">每根引线电阻 r，用于二/三线补偿</string>
+    <string name="hint_tc_hot_temp">被测端温度 Thot。%1$s</string>
+    <string name="hint_tc_cj">冷端温度 Tcj（启用补偿时填写）。%1$s</string>
+    <string name="hint_tc_mv">热电势 E（mV）。%1$s</string>
+    <string name="hint_rtd_temp">元件温度。%1$s</string>
+    <string name="hint_rtd_resistance">测得电阻（含引线）。%1$s</string>
+
+    <string name="status_thermocouple">热电偶/热电阻计算器 - 热电偶</string>
+    <string name="status_rtd">热电偶/热电阻计算器 - 热电阻</string>
+    <string name="status_probe">热电偶/热电阻计算器 - 探头</string>
+    <string name="status_dp_level">热电偶/热电阻计算器 - 差压液位计</string>
+
+    <string name="probe_title">探头窜量/电压计算</string>
+    <string name="probe_mode_chuan">窜量计算</string>
+    <string name="probe_mode_voltage">电压计算</string>
+    <string name="hint_probe_mode_chuan">输入窜量，计算远端/近端电压</string>
+    <string name="hint_probe_mode_voltage">输入电压，反算窜量</string>
+
+    <string name="hint_zero_preset">选择常用零位电压</string>
+    <string name="hint_zero_custom">手动输入零位电压</string>
+    <string name="hint_zero_preset_select">点击选择预设值</string>
+    <string name="hint_zero_custom_input">范围 0–10 V</string>
+
+    <string name="hint_unit_mm">mm（毫米）</string>
+    <string name="hint_unit_dao">道（1道=0.01mm）</string>
+    <string name="hint_probe_chuan_input">窜量 C，可选 mm/道</string>
+    <string name="hint_probe_voltage_input">电压 V，结合零位电压反算窜量</string>
+
+    <string name="dp_level_title">差压液位计计算</string>
+    <string name="dp_level_instrument_dp">差压液位计</string>
+    <string name="dp_level_instrument_dual">双法兰液位计</string>
+    <string name="hint_dp_level_instrument_dp">仅使用介质密度计算 P=ρgh</string>
+    <string name="hint_dp_level_instrument_dual">可叠加硅油静压差修正</string>
+
+    <string name="dp_level_mode_rho_height">密度+高度</string>
+    <string name="dp_level_mode_recalc">量程反算</string>
+    <string name="hint_dp_level_mode_rho_height">输入介质密度与高度，计算零点/量程</string>
+    <string name="hint_dp_level_mode_recalc">已知量程上下限与液位%，输入当前差压，重算上下限</string>
+
+    <string name="dp_level_medium_density">介质密度</string>
+    <string name="hint_dp_level_medium_density">ρ（kg/m³），用于 P=ρgh，g=9.81</string>
+    <string name="dp_level_span_height">测量高度</string>
+    <string name="hint_dp_level_span_height">量程高度 H（例如 0~H 对应 4~20mA）</string>
+    <string name="dp_level_zero_shift_height">零点迁移高度</string>
+    <string name="hint_dp_level_zero_shift_height">零点迁移高度 h0（默认 0）；可正可负</string>
+    <string name="hint_dp_level_zero_shift_height2">输入高度值（正数），方向用“迁移”开关选择</string>
+
+    <string name="dp_level_shift_negative">负迁移</string>
+    <string name="dp_level_shift_positive">正迁移</string>
+    <string name="hint_dp_level_shift_negative">默认：零点为负值</string>
+    <string name="hint_dp_level_shift_positive">零点为正值</string>
+
+    <string name="dp_level_oil_density">硅油密度</string>
+    <string name="hint_dp_level_oil_density">毛细管填充液密度（默认 950kg/m³）</string>
+    <string name="dp_level_oil_equiv_height">硅油等效高度</string>
+    <string name="hint_dp_level_oil_equiv_height">等效高度 hOil（=h2-h3），用于 ΔP=ρ1gh0+ρ0ghOil</string>
+    <string name="hint_dp_level_oil_equiv_height2">输入高度值（正数）；方向由迁移开关决定</string>
+
+    <string name="dp_level_lrv">量程下限（LRV）</string>
+    <string name="hint_dp_level_lrv">已知原量程下限（4mA 对应差压）</string>
+    <string name="dp_level_urv">量程上限（URV）</string>
+    <string name="hint_dp_level_urv">已知原量程上限（20mA 对应差压）</string>
+    <string name="dp_level_level_percent">实际液位</string>
+    <string name="hint_dp_level_level_percent">当前真实液位百分比（0–100%）</string>
+    <string name="dp_level_dp_now">当前差压</string>
+    <string name="hint_dp_level_dp_now">当前仪表测得差压（静压差）</string>
+
+    <string name="dp_level_output_unit">输出单位</string>
+    <string name="hint_dp_level_output_unit">选择结果输出单位（kPa/mmH₂O/bar 等）</string>
+    <string name="dp_level_lrv_out">重算下限（LRV）</string>
+    <string name="dp_level_urv_out">重算上限（URV）</string>
+    <string name="dp_level_span_kpa">量程值</string>
+    <string name="dp_level_density_out">反算密度</string>
+    <string name="unit_kg_m3">kg/m³</string>
+
+    <string name="dp_level_wizard_open">安装向导</string>
+    <string name="dp_level_wizard_title">安装场景向导</string>
+    <string name="dp_level_wizard_step">步骤 %1$d/%2$d</string>
+    <string name="dp_level_wizard_back">上一步</string>
+    <string name="dp_level_wizard_next">下一步</string>
+    <string name="dp_level_wizard_apply">应用</string>
+
+    <string name="dp_level_wizard_s1_desc">选择你要计算的仪表类型：差压液位计或双法兰液位计（双法兰可叠加毛细管硅油静压差修正）。</string>
+    <string name="dp_level_wizard_s2_desc">选择计算模式：\n- 密度+高度：已知介质密度 ρ 与量程高度 H\n- 差压+高度：已知差压 ΔP 与高度 H，系统自动反算 ρ</string>
+    <string name="dp_level_wizard_s3_desc">填写安装几何参数：\n- H：量程高度\n- h0：零点迁移高度（默认 0，可正可负）</string>
+    <string name="dp_level_wizard_s3_dual_note">双法兰需要额外输入两侧毛细管的垂直高度差（向上为“+”，向下为“-”），系统会自动计算 hOil = h2 - h3。</string>
+    <string name="dp_level_wizard_h2">h2（高压侧毛细管高度）</string>
+    <string name="dp_level_wizard_h3">h3（低压侧毛细管高度）</string>
+    <string name="dp_level_wizard_h2_hint">高压侧毛细管填充液柱高度（以变送器为参考）</string>
+    <string name="dp_level_wizard_h3_hint">低压侧毛细管填充液柱高度（以变送器为参考）</string>
+    <string name="dp_level_wizard_hoil">计算得到 hOil = %1$s %2$s</string>
+
+    <string name="dp_level_wizard_s4_desc">填写介质/硅油密度或差压输入，并选择输出单位。</string>
+    <string name="dp_level_wizard_output_unit_tip">输出单位会同时作用于“零点值/量程值”的显示与复制。</string>
+
+    <string name="dp_level_wizard_s5_desc">结果预览：确认无误后点击“应用”，会把向导参数自动填入“差压液位计计算”页面。</string>
+    <string name="dp_level_wizard_unit_height_hint">高度单位（m/mm）</string>
+    <string name="dp_level_wizard_dp_unit">差压单位</string>
+    <string name="dp_level_wizard_dp_unit_hint">选择 ΔP 输入的单位</string>
+    <string name="dp_level_wizard_output_unit_hint">选择结果输出单位</string>
+    <string name="dp_level_wizard_s3_recalc_desc">量程反算需要输入：原量程上下限（LRV/URV）、实际液位%（0–100）、当前差压 ΔPnow。</string>
+</resources>

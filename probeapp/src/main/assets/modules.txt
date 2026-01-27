@@ -1,0 +1,7 @@
+# 功能模块列表（每行一个类名）
+# 支持 Kotlin object（通过 INSTANCE）或无参构造
+com.kidsafe.probe.modules.impl.ThermocoupleModule
+com.kidsafe.probe.modules.impl.RtdModule
+com.kidsafe.probe.modules.impl.ProbeModule
+com.kidsafe.probe.modules.impl.DpLevelModule
+com.kidsafe.probe.modules.impl.CableDropModule
