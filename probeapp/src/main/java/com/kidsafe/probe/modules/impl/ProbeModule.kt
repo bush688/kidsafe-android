@@ -22,8 +22,8 @@ object ProbeModule : FeatureModule {
             onCopy = { text ->
                 host.copyToClipboard("probe_calc", text)
                 host.showMessage(host.context.getString(R.string.copied))
-            }
+            },
+            onMessage = { message -> host.showMessage(message) },
         )
     }
 }
-

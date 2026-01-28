@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.kidsafe.probe.ModuleInputStore
 import com.kidsafe.probe.R
 import com.kidsafe.probe.ThermoHistoryRecord
 import com.kidsafe.probe.ThermoHistoryStore
@@ -42,6 +44,7 @@ import com.kidsafe.probe.modules.ModuleHost
 import com.kidsafe.probe.ui.ChoiceButton
 import com.kidsafe.probe.ui.SecondaryButton
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,6 +69,7 @@ object ThermocoupleModule : FeatureModule {
         val repo = remember(appContext) { Its90Repository(appContext) }
         val calc = remember(repo) { ThermocoupleCalculator(repo) }
         val historyStore = remember(appContext) { ThermoHistoryStore(appContext) }
+        val inputStore = remember(appContext) { ModuleInputStore(appContext) }
         val history by historyStore.history.collectAsState(initial = emptyList())
         val scope = androidx.compose.runtime.rememberCoroutineScope()
 
@@ -80,8 +84,36 @@ object ThermocoupleModule : FeatureModule {
 
         var resultText by remember { mutableStateOf<String?>(null) }
         var errorText by remember { mutableStateOf<String?>(null) }
+        var inputsLoaded by remember { mutableStateOf(false) }
 
         val lookup = remember(type) { repo.thermocoupleTable(type) }
+
+        LaunchedEffect(Unit) {
+            val obj = inputStore.load(descriptor.id)
+            if (obj != null) {
+                runCatching { ThermocoupleType.valueOf(obj.optString("type", type.name)) }.getOrNull()?.let { type = it }
+                runCatching { Mode.valueOf(obj.optString("mode", mode.name)) }.getOrNull()?.let { mode = it }
+                useCjc = obj.optBoolean("useCjc", useCjc)
+                tempText = obj.optString("tempText", tempText)
+                mvText = obj.optString("mvText", mvText)
+                cjText = obj.optString("cjText", cjText)
+            }
+            inputsLoaded = true
+        }
+
+        LaunchedEffect(type, mode, useCjc, tempText, mvText, cjText, inputsLoaded) {
+            if (!inputsLoaded) return@LaunchedEffect
+            inputStore.save(
+                descriptor.id,
+                JSONObject()
+                    .put("type", type.name)
+                    .put("mode", mode.name)
+                    .put("useCjc", useCjc)
+                    .put("tempText", tempText)
+                    .put("mvText", mvText)
+                    .put("cjText", cjText)
+            )
+        }
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -313,6 +345,24 @@ object ThermocoupleModule : FeatureModule {
                                     Log.e("ThermocoupleModule", "calc failed", e)
                                     errorText = context.getString(R.string.calc_failed)
                                     resultText = null
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        SecondaryButton(
+                            title = context.getString(R.string.restore_defaults),
+                            onClick = {
+                                type = ThermocoupleType.K
+                                mode = Mode.TEMP_TO_VALUE
+                                useCjc = true
+                                tempText = ""
+                                mvText = ""
+                                cjText = "25"
+                                resultText = null
+                                errorText = null
+                                scope.launch {
+                                    inputStore.clear(descriptor.id)
+                                    host.showMessage(context.getString(R.string.restored_defaults))
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),

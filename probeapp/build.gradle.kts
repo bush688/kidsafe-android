@@ -27,6 +27,15 @@ android {
     namespace = "com.kidsafe.probe"
     compileSdk = 35
 
+    signingConfigs {
+        getByName("debug") {
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
+
     defaultConfig {
         applicationId = "com.kidsafe.probe"
         minSdk = 26
@@ -40,6 +49,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -134,7 +144,7 @@ tasks.register("exportProbeReleaseApk") {
     doLast {
         val version = exportedProbeVersionName()
         val destDir = exportedApkDir.asFile.apply { mkdirs() }
-        val dest = File(destDir, "${exportedApkBaseName}_v${version}_release_未签名.apk")
+        val dest = File(destDir, "${exportedApkBaseName}_v${version}_release_已签名.apk")
 
         val releaseApkDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
         val candidates = if (releaseApkDir.exists()) {
@@ -142,7 +152,8 @@ tasks.register("exportProbeReleaseApk") {
         } else {
             emptyList()
         }
-        val src = candidates.firstOrNull { it.name.endsWith("-unsigned.apk", ignoreCase = true) }
+        val src = candidates.firstOrNull { !it.name.endsWith("-unsigned.apk", ignoreCase = true) }
+            ?: candidates.firstOrNull { it.name.endsWith("-unsigned.apk", ignoreCase = true) }
             ?: candidates.firstOrNull()
             ?: throw GradleException("Release APK 不存在：${releaseApkDir.absolutePath}")
 

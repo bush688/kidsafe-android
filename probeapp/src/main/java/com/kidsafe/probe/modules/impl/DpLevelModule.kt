@@ -22,8 +22,8 @@ object DpLevelModule : FeatureModule {
             onCopy = { text ->
                 host.copyToClipboard("dp_level_calc", text)
                 host.showMessage(host.context.getString(R.string.copied))
-            }
+            },
+            onMessage = { message -> host.showMessage(message) },
         )
     }
 }
-

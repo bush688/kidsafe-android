@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,30 +66,30 @@ fun DpLevelWizardDialog(
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var draftLoaded by rememberSaveable { mutableStateOf(false) }
+    var draftLoaded by remember { mutableStateOf(false) }
 
-    var currentStep by rememberSaveable { mutableStateOf(0) }
-    var completedStep by rememberSaveable { mutableStateOf(-1) }
+    var currentStep by remember { mutableStateOf(0) }
+    var completedStep by remember { mutableStateOf(-1) }
 
-    var instrument by rememberSaveable { mutableStateOf(DpLevelInstrument.DP) }
-    var mode by rememberSaveable { mutableStateOf(DpLevelMode.RHO_AND_HEIGHT) }
-    var zeroShiftDirection by rememberSaveable { mutableStateOf(DpZeroShiftDirection.NEGATIVE) }
-    var dpUnit by rememberSaveable { mutableStateOf(PressureUnit.KPA) }
-    var heightUnit by rememberSaveable { mutableStateOf(HeightUnit.M) }
-    var outputUnit by rememberSaveable { mutableStateOf(PressureUnit.KPA) }
+    var instrument by remember { mutableStateOf(DpLevelInstrument.DP) }
+    var mode by remember { mutableStateOf(DpLevelMode.RHO_AND_HEIGHT) }
+    var zeroShiftDirection by remember { mutableStateOf(DpZeroShiftDirection.NEGATIVE) }
+    var dpUnit by remember { mutableStateOf(PressureUnit.KPA) }
+    var heightUnit by remember { mutableStateOf(HeightUnit.M) }
+    var outputUnit by remember { mutableStateOf(PressureUnit.KPA) }
 
-    var spanHeightText by rememberSaveable { mutableStateOf("1") }
-    var zeroShiftText by rememberSaveable { mutableStateOf("0") }
-    var h2Text by rememberSaveable { mutableStateOf("0") }
-    var h3Text by rememberSaveable { mutableStateOf("0") }
-    var mediumDensityText by rememberSaveable { mutableStateOf("1000") }
-    var oilDensityText by rememberSaveable { mutableStateOf("950") }
-    var lrvText by rememberSaveable { mutableStateOf("0") }
-    var urvText by rememberSaveable { mutableStateOf("100") }
-    var levelPercentText by rememberSaveable { mutableStateOf("50") }
-    var dpNowText by rememberSaveable { mutableStateOf("0") }
+    var spanHeightText by remember { mutableStateOf("1") }
+    var zeroShiftText by remember { mutableStateOf("0") }
+    var h2Text by remember { mutableStateOf("0") }
+    var h3Text by remember { mutableStateOf("0") }
+    var mediumDensityText by remember { mutableStateOf("1000") }
+    var oilDensityText by remember { mutableStateOf("950") }
+    var lrvText by remember { mutableStateOf("0") }
+    var urvText by remember { mutableStateOf("100") }
+    var levelPercentText by remember { mutableStateOf("50") }
+    var dpNowText by remember { mutableStateOf("0") }
 
-    var errorText by rememberSaveable { mutableStateOf<String?>(null) }
+    var errorText by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(initialDraft) {
         if (!draftLoaded) {
@@ -674,7 +673,7 @@ private fun UnitDropdown(
     unit: PressureUnit,
     onUnitChange: (PressureUnit) -> Unit,
 ) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
         OutlinedTextField(
             value = unit.displayName,

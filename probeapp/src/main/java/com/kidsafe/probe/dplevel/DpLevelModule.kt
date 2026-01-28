@@ -19,22 +19,24 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.kidsafe.probe.ModuleInputStore
 import com.kidsafe.probe.R
 import com.kidsafe.probe.ui.ChoiceButton
 import com.kidsafe.probe.ui.SecondaryButton
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +44,7 @@ import java.util.Locale
 fun DpLevelModule(
     modifier: Modifier = Modifier,
     onCopy: suspend (String) -> Unit,
+    onMessage: suspend (String) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val appContext = remember(context) { context.applicationContext }
@@ -50,31 +53,95 @@ fun DpLevelModule(
     val scope = rememberCoroutineScope()
     val wizardStore = remember(appContext) { DpLevelWizardStore(appContext) }
     val wizardDraft by wizardStore.draft.collectAsState(initial = dpLevelWizardDefaultDraft())
-    var showWizard by rememberSaveable { mutableStateOf(false) }
+    val inputStore = remember(appContext) { ModuleInputStore(appContext) }
+    var showWizard by remember { mutableStateOf(false) }
 
-    var instrument by rememberSaveable { mutableStateOf(DpLevelInstrument.DP) }
-    var mode by rememberSaveable { mutableStateOf(DpLevelMode.RHO_AND_HEIGHT) }
-    var zeroShiftDirection by rememberSaveable { mutableStateOf(DpZeroShiftDirection.NEGATIVE) }
+    var instrument by remember { mutableStateOf(DpLevelInstrument.DP) }
+    var mode by remember { mutableStateOf(DpLevelMode.RHO_AND_HEIGHT) }
+    var zeroShiftDirection by remember { mutableStateOf(DpZeroShiftDirection.NEGATIVE) }
 
-    var mediumDensityText by rememberSaveable { mutableStateOf("1000") }
-    var oilDensityText by rememberSaveable { mutableStateOf("950") }
+    var mediumDensityText by remember { mutableStateOf("1000") }
+    var oilDensityText by remember { mutableStateOf("950") }
 
-    var spanHeightText by rememberSaveable { mutableStateOf("1") }
-    var spanHeightUnit by rememberSaveable { mutableStateOf(HeightUnit.M) }
+    var spanHeightText by remember { mutableStateOf("1") }
+    var spanHeightUnit by remember { mutableStateOf(HeightUnit.M) }
 
-    var zeroShiftText by rememberSaveable { mutableStateOf("0") }
-    var oilHeightText by rememberSaveable { mutableStateOf("0") }
+    var zeroShiftText by remember { mutableStateOf("0") }
+    var oilHeightText by remember { mutableStateOf("0") }
 
-    var lrvText by rememberSaveable { mutableStateOf("0") }
-    var urvText by rememberSaveable { mutableStateOf("100") }
-    var levelPercentText by rememberSaveable { mutableStateOf("50") }
-    var dpNowText by rememberSaveable { mutableStateOf("0") }
-    var dpUnit by rememberSaveable { mutableStateOf(PressureUnit.KPA) }
+    var lrvText by remember { mutableStateOf("0") }
+    var urvText by remember { mutableStateOf("100") }
+    var levelPercentText by remember { mutableStateOf("50") }
+    var dpNowText by remember { mutableStateOf("0") }
+    var dpUnit by remember { mutableStateOf(PressureUnit.KPA) }
 
-    var outputUnit by rememberSaveable { mutableStateOf(PressureUnit.KPA) }
+    var outputUnit by remember { mutableStateOf(PressureUnit.KPA) }
 
-    var errorText by rememberSaveable { mutableStateOf<String?>(null) }
-    var result by rememberSaveable { mutableStateOf<DpLevelResult?>(null) }
+    var errorText by remember { mutableStateOf<String?>(null) }
+    var result by remember { mutableStateOf<DpLevelResult?>(null) }
+    var inputsLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val obj = inputStore.load("dp_level")
+        if (obj != null) {
+            runCatching { DpLevelInstrument.valueOf(obj.optString("instrument", instrument.name)) }.getOrNull()?.let { instrument = it }
+            runCatching { DpLevelMode.valueOf(obj.optString("mode", mode.name)) }.getOrNull()?.let { mode = it }
+            runCatching { DpZeroShiftDirection.valueOf(obj.optString("zeroShiftDirection", zeroShiftDirection.name)) }.getOrNull()?.let { zeroShiftDirection = it }
+            mediumDensityText = obj.optString("mediumDensityText", mediumDensityText)
+            oilDensityText = obj.optString("oilDensityText", oilDensityText)
+            spanHeightText = obj.optString("spanHeightText", spanHeightText)
+            runCatching { HeightUnit.valueOf(obj.optString("spanHeightUnit", spanHeightUnit.name)) }.getOrNull()?.let { spanHeightUnit = it }
+            zeroShiftText = obj.optString("zeroShiftText", zeroShiftText)
+            oilHeightText = obj.optString("oilHeightText", oilHeightText)
+            lrvText = obj.optString("lrvText", lrvText)
+            urvText = obj.optString("urvText", urvText)
+            levelPercentText = obj.optString("levelPercentText", levelPercentText)
+            dpNowText = obj.optString("dpNowText", dpNowText)
+            runCatching { PressureUnit.valueOf(obj.optString("dpUnit", dpUnit.name)) }.getOrNull()?.let { dpUnit = it }
+            runCatching { PressureUnit.valueOf(obj.optString("outputUnit", outputUnit.name)) }.getOrNull()?.let { outputUnit = it }
+        }
+        inputsLoaded = true
+    }
+
+    LaunchedEffect(
+        instrument,
+        mode,
+        zeroShiftDirection,
+        mediumDensityText,
+        oilDensityText,
+        spanHeightText,
+        spanHeightUnit,
+        zeroShiftText,
+        oilHeightText,
+        lrvText,
+        urvText,
+        levelPercentText,
+        dpNowText,
+        dpUnit,
+        outputUnit,
+        inputsLoaded,
+    ) {
+        if (!inputsLoaded) return@LaunchedEffect
+        inputStore.save(
+            "dp_level",
+            JSONObject()
+                .put("instrument", instrument.name)
+                .put("mode", mode.name)
+                .put("zeroShiftDirection", zeroShiftDirection.name)
+                .put("mediumDensityText", mediumDensityText)
+                .put("oilDensityText", oilDensityText)
+                .put("spanHeightText", spanHeightText)
+                .put("spanHeightUnit", spanHeightUnit.name)
+                .put("zeroShiftText", zeroShiftText)
+                .put("oilHeightText", oilHeightText)
+                .put("lrvText", lrvText)
+                .put("urvText", urvText)
+                .put("levelPercentText", levelPercentText)
+                .put("dpNowText", dpNowText)
+                .put("dpUnit", dpUnit.name)
+                .put("outputUnit", outputUnit.name)
+        )
+    }
 
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -326,6 +393,33 @@ fun DpLevelModule(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    SecondaryButton(
+                        title = context.getString(R.string.restore_defaults),
+                        onClick = {
+                            instrument = DpLevelInstrument.DP
+                            mode = DpLevelMode.RHO_AND_HEIGHT
+                            zeroShiftDirection = DpZeroShiftDirection.NEGATIVE
+                            mediumDensityText = "1000"
+                            oilDensityText = "950"
+                            spanHeightText = "1"
+                            spanHeightUnit = HeightUnit.M
+                            zeroShiftText = "0"
+                            oilHeightText = "0"
+                            lrvText = "0"
+                            urvText = "100"
+                            levelPercentText = "50"
+                            dpNowText = "0"
+                            dpUnit = PressureUnit.KPA
+                            outputUnit = PressureUnit.KPA
+                            errorText = null
+                            result = null
+                            scope.launch {
+                                inputStore.clear("dp_level")
+                                onMessage(context.getString(R.string.restored_defaults))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     Text(
                         text = context.getString(R.string.hint_calculate),
                         style = MaterialTheme.typography.bodySmall,
@@ -479,7 +573,7 @@ private fun UnitOutputRow(
     unit: PressureUnit,
     onUnitChange: (PressureUnit) -> Unit,
 ) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
         OutlinedTextField(
             value = unit.displayName,
@@ -515,7 +609,7 @@ private fun HeightInputRow(
     onUnitChange: (HeightUnit) -> Unit,
     allowNegative: Boolean,
 ) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
             value = valueText,
@@ -564,7 +658,7 @@ private fun PressureInputRow(
     onUnitChange: (PressureUnit) -> Unit,
     allowNegative: Boolean,
 ) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
             value = valueText,

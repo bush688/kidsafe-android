@@ -35,12 +35,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.kidsafe.probe.ModuleInputStore
 import com.kidsafe.probe.R
 import com.kidsafe.probe.cable.AreaUnit
 import com.kidsafe.probe.cable.AwgSize
@@ -60,6 +60,7 @@ import com.kidsafe.probe.modules.ModuleHost
 import com.kidsafe.probe.ui.ChoiceButton
 import com.kidsafe.probe.ui.SecondaryButton
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.Locale
 import kotlin.math.PI
 
@@ -80,47 +81,80 @@ object CableDropModule : FeatureModule {
         val context = host.context
         val appContext = remember(context) { context.applicationContext }
         val store = remember(appContext) { CableCalcStore(appContext) }
+        val inputStore = remember(appContext) { ModuleInputStore(appContext) }
         val presets by store.presets.collectAsState(initial = emptyList())
         val last by store.lastScenario.collectAsState(initial = null)
         val scope = rememberCoroutineScope()
+        var inputsLoaded by remember { mutableStateOf(false) }
+        var loadedFromInputStore by remember { mutableStateOf(false) }
 
-        var tab by rememberSaveable { mutableStateOf(CableTab.DROP) }
+        var tab by remember { mutableStateOf(CableTab.DROP) }
 
-        var material by rememberSaveable { mutableStateOf(CableMaterial.COPPER) }
-        var areaUnit by rememberSaveable { mutableStateOf(AreaUnit.MM2) }
-        var mm2Mode by rememberSaveable { mutableStateOf("standard") }
-        var mm2Standard by rememberSaveable { mutableStateOf(2.5) }
+        var material by remember { mutableStateOf(CableMaterial.COPPER) }
+        var areaUnit by remember { mutableStateOf(AreaUnit.MM2) }
+        var mm2Mode by remember { mutableStateOf("standard") }
+        var mm2Standard by remember { mutableStateOf(2.5) }
         var mm2StandardExpanded by remember { mutableStateOf(false) }
-        var mm2Text by rememberSaveable { mutableStateOf("2.5") }
-        var awgGauge by rememberSaveable { mutableStateOf(12) }
+        var mm2Text by remember { mutableStateOf("2.5") }
+        var awgGauge by remember { mutableStateOf(12) }
         var awgExpanded by remember { mutableStateOf(false) }
 
-        var lengthUnit by rememberSaveable { mutableStateOf(LengthUnit.METER) }
+        var lengthUnit by remember { mutableStateOf(LengthUnit.METER) }
         var lengthUnitExpanded by remember { mutableStateOf(false) }
-        var lengthText by rememberSaveable { mutableStateOf("10") }
-        var tempText by rememberSaveable { mutableStateOf("20") }
+        var lengthText by remember { mutableStateOf("10") }
+        var tempText by remember { mutableStateOf("20") }
 
-        var circuitType by rememberSaveable { mutableStateOf(CircuitType.DC) }
-        var powerFactorText by rememberSaveable { mutableStateOf("0.90") }
-        var frequencyHzText by rememberSaveable { mutableStateOf("50") }
-        var inductanceMhPerKmText by rememberSaveable { mutableStateOf("0") }
+        var circuitType by remember { mutableStateOf(CircuitType.DC) }
+        var powerFactorText by remember { mutableStateOf("0.90") }
+        var frequencyHzText by remember { mutableStateOf("50") }
+        var inductanceMhPerKmText by remember { mutableStateOf("0") }
 
-        var wiring by rememberSaveable { mutableStateOf(VoltageDropWiring.SINGLE_PHASE_2W) }
+        var wiring by remember { mutableStateOf(VoltageDropWiring.SINGLE_PHASE_2W) }
         var wiringExpanded by remember { mutableStateOf(false) }
-        var currentText by rememberSaveable { mutableStateOf("10") }
-        var supplyText by rememberSaveable { mutableStateOf("220") }
-        var limitMode by rememberSaveable { mutableStateOf("3") }
-        var limitText by rememberSaveable { mutableStateOf("3") }
+        var currentText by remember { mutableStateOf("10") }
+        var supplyText by remember { mutableStateOf("220") }
+        var limitMode by remember { mutableStateOf("3") }
+        var limitText by remember { mutableStateOf("3") }
 
-        var scenarioName by rememberSaveable { mutableStateOf("") }
-        var selectedPresetName by rememberSaveable { mutableStateOf<String?>(null) }
+        var scenarioName by remember { mutableStateOf("") }
+        var selectedPresetName by remember { mutableStateOf<String?>(null) }
 
         var resultText by remember { mutableStateOf<String?>(null) }
         var reportText by remember { mutableStateOf<String?>(null) }
         var errorText by remember { mutableStateOf<String?>(null) }
         val awg = remember(awgGauge) { AwgSize(awgGauge) }
 
-        LaunchedEffect(last) {
+        LaunchedEffect(Unit) {
+            val obj = inputStore.load(descriptor.id)
+            if (obj != null) {
+                loadedFromInputStore = true
+                runCatching { CableTab.valueOf(obj.optString("tab", tab.name)) }.getOrNull()?.let { tab = it }
+                runCatching { CableMaterial.valueOf(obj.optString("material", material.name)) }.getOrNull()?.let { material = it }
+                runCatching { AreaUnit.valueOf(obj.optString("areaUnit", areaUnit.name)) }.getOrNull()?.let { areaUnit = it }
+                mm2Mode = obj.optString("mm2Mode", mm2Mode)
+                obj.optDouble("mm2Standard").takeIf { it.isFinite() && it > 0.0 }?.let { mm2Standard = it }
+                mm2Text = obj.optString("mm2Text", mm2Text)
+                obj.optInt("awgGauge").takeIf { it > 0 }?.let { awgGauge = it }
+                runCatching { LengthUnit.valueOf(obj.optString("lengthUnit", lengthUnit.name)) }.getOrNull()?.let { lengthUnit = it }
+                lengthText = obj.optString("lengthText", lengthText)
+                tempText = obj.optString("tempText", tempText)
+                runCatching { CircuitType.valueOf(obj.optString("circuitType", circuitType.name)) }.getOrNull()?.let { circuitType = it }
+                powerFactorText = obj.optString("powerFactorText", powerFactorText)
+                frequencyHzText = obj.optString("frequencyHzText", frequencyHzText)
+                inductanceMhPerKmText = obj.optString("inductanceMhPerKmText", inductanceMhPerKmText)
+                runCatching { VoltageDropWiring.valueOf(obj.optString("wiring", wiring.name)) }.getOrNull()?.let { wiring = it }
+                currentText = obj.optString("currentText", currentText)
+                supplyText = obj.optString("supplyText", supplyText)
+                limitMode = obj.optString("limitMode", limitMode)
+                limitText = obj.optString("limitText", limitText)
+                scenarioName = obj.optString("scenarioName", scenarioName)
+                selectedPresetName = obj.optString("selectedPresetName").takeIf { it.isNotBlank() }
+            }
+            inputsLoaded = true
+        }
+
+        LaunchedEffect(last, inputsLoaded, loadedFromInputStore) {
+            if (!inputsLoaded || loadedFromInputStore) return@LaunchedEffect
             val s = last ?: return@LaunchedEffect
             material = s.material
             areaUnit = s.areaUnit
@@ -138,6 +172,58 @@ object CableDropModule : FeatureModule {
             s.powerFactor?.let { powerFactorText = it.toString() }
             s.frequencyHz?.let { frequencyHzText = it.toString() }
             s.inductanceMhPerKm?.let { inductanceMhPerKmText = it.toString() }
+        }
+
+        LaunchedEffect(
+            tab,
+            material,
+            areaUnit,
+            mm2Mode,
+            mm2Standard,
+            mm2Text,
+            awgGauge,
+            lengthUnit,
+            lengthText,
+            tempText,
+            circuitType,
+            powerFactorText,
+            frequencyHzText,
+            inductanceMhPerKmText,
+            wiring,
+            currentText,
+            supplyText,
+            limitMode,
+            limitText,
+            scenarioName,
+            selectedPresetName,
+            inputsLoaded,
+        ) {
+            if (!inputsLoaded) return@LaunchedEffect
+            inputStore.save(
+                descriptor.id,
+                JSONObject()
+                    .put("tab", tab.name)
+                    .put("material", material.name)
+                    .put("areaUnit", areaUnit.name)
+                    .put("mm2Mode", mm2Mode)
+                    .put("mm2Standard", mm2Standard)
+                    .put("mm2Text", mm2Text)
+                    .put("awgGauge", awgGauge)
+                    .put("lengthUnit", lengthUnit.name)
+                    .put("lengthText", lengthText)
+                    .put("tempText", tempText)
+                    .put("circuitType", circuitType.name)
+                    .put("powerFactorText", powerFactorText)
+                    .put("frequencyHzText", frequencyHzText)
+                    .put("inductanceMhPerKmText", inductanceMhPerKmText)
+                    .put("wiring", wiring.name)
+                    .put("currentText", currentText)
+                    .put("supplyText", supplyText)
+                    .put("limitMode", limitMode)
+                    .put("limitText", limitText)
+                    .put("scenarioName", scenarioName)
+                    .put("selectedPresetName", selectedPresetName ?: "")
+            )
         }
 
         Column(
@@ -772,6 +858,43 @@ object CableDropModule : FeatureModule {
                         host.showMessage(context.getString(R.string.deleted))
                     }
                 },
+            )
+
+            SecondaryButton(
+                title = context.getString(R.string.restore_defaults),
+                onClick = {
+                    tab = CableTab.DROP
+                    material = CableMaterial.COPPER
+                    areaUnit = AreaUnit.MM2
+                    mm2Mode = "standard"
+                    mm2Standard = 2.5
+                    mm2Text = "2.5"
+                    awgGauge = 12
+                    lengthUnit = LengthUnit.METER
+                    lengthText = "10"
+                    tempText = "20"
+                    circuitType = CircuitType.DC
+                    powerFactorText = "0.90"
+                    frequencyHzText = "50"
+                    inductanceMhPerKmText = "0"
+                    wiring = VoltageDropWiring.SINGLE_PHASE_2W
+                    currentText = "10"
+                    supplyText = "220"
+                    limitMode = "3"
+                    limitText = "3"
+                    scenarioName = ""
+                    selectedPresetName = null
+                    resultText = null
+                    reportText = null
+                    errorText = null
+                    loadedFromInputStore = false
+                    scope.launch {
+                        inputStore.clear(descriptor.id)
+                        store.clearLast()
+                        host.showMessage(context.getString(R.string.restored_defaults))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

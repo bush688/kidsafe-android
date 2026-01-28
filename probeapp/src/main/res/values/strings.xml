@@ -42,6 +42,8 @@
     <string name="close">关闭</string>
     <string name="copyright_maker">制作：bush688</string>
     <string name="contact_email">联系方式：bush688@gmail.com</string>
+    <string name="restore_defaults">恢复默认</string>
+    <string name="restored_defaults">已恢复默认数据</string>
     <string name="empty_placeholder">—</string>
 
     <string name="tab_thermocouple">热电偶</string>

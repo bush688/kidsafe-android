@@ -89,6 +89,12 @@ class CableCalcStore(private val context: Context) {
         }
     }
 
+    suspend fun clearLast() {
+        context.probeDataStore.edit { prefs ->
+            prefs.remove(lastKey)
+        }
+    }
+
     suspend fun upsertPreset(scenario: CableScenario) {
         context.probeDataStore.edit { prefs ->
             val list = decodeScenarioList(prefs[presetsKey] ?: "")

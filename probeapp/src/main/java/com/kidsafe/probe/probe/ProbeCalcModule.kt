@@ -27,12 +27,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kidsafe.probe.CalcRecord
 import com.kidsafe.probe.HistoryStore
+import com.kidsafe.probe.ModuleInputStore
 import com.kidsafe.probe.ProbeCalculator
 import com.kidsafe.probe.ProbeSettings
 import com.kidsafe.probe.R
@@ -47,6 +48,7 @@ import com.kidsafe.probe.SettingsStore
 import com.kidsafe.probe.ui.ChoiceButton
 import com.kidsafe.probe.ui.SecondaryButton
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.Locale
 
 private enum class ChuanUnit {
@@ -68,11 +70,13 @@ private enum class ProbeMode {
 fun ProbeCalcModule(
     modifier: Modifier = Modifier,
     onCopy: suspend (String) -> Unit,
+    onMessage: suspend (String) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val appContext = remember(context) { context.applicationContext }
     val historyStore = remember(appContext) { HistoryStore(appContext) }
     val settingsStore = remember(appContext) { SettingsStore(appContext) }
+    val inputStore = remember(appContext) { ModuleInputStore(appContext) }
     val scope = rememberCoroutineScope()
     val history by historyStore.history.collectAsState(initial = emptyList())
     val settings by settingsStore.settings.collectAsState(initial = ProbeSettings(ProbeCalculator.defaultZeroVoltage()))
@@ -81,28 +85,52 @@ fun ProbeCalcModule(
         listOf(10.0, 9.5, 9.0, 8.5, 8.0, 7.5, 7.0, 5.0, 0.0)
     }
 
-    var mode by rememberSaveable { mutableStateOf(ProbeMode.CHUAN) }
+    var mode by remember { mutableStateOf(ProbeMode.CHUAN) }
 
-    var zeroMode by rememberSaveable { mutableStateOf(ZeroVoltageMode.PRESET) }
-    var zeroVoltageV by rememberSaveable { mutableStateOf(ProbeCalculator.defaultZeroVoltage()) }
-    var zeroCustomText by rememberSaveable { mutableStateOf("") }
-    var zeroError by rememberSaveable { mutableStateOf<String?>(null) }
-    var presetExpanded by rememberSaveable { mutableStateOf(false) }
-    var presetSelectedV by rememberSaveable { mutableStateOf(10.0) }
-    var loadedFromStore by rememberSaveable { mutableStateOf(false) }
+    var zeroMode by remember { mutableStateOf(ZeroVoltageMode.PRESET) }
+    var zeroVoltageV by remember { mutableStateOf(ProbeCalculator.defaultZeroVoltage()) }
+    var zeroCustomText by remember { mutableStateOf("") }
+    var zeroError by remember { mutableStateOf<String?>(null) }
+    var presetExpanded by remember { mutableStateOf(false) }
+    var presetSelectedV by remember { mutableStateOf(10.0) }
+    var loadedFromStore by remember { mutableStateOf(false) }
 
-    var chuanText by rememberSaveable { mutableStateOf("") }
-    var chuanUnit by rememberSaveable { mutableStateOf(ChuanUnit.MM) }
-    var inputError by rememberSaveable { mutableStateOf<String?>(null) }
-    var vFar by rememberSaveable { mutableStateOf<Double?>(null) }
-    var vNear by rememberSaveable { mutableStateOf<Double?>(null) }
+    var chuanText by remember { mutableStateOf("") }
+    var chuanUnit by remember { mutableStateOf(ChuanUnit.MM) }
+    var inputError by remember { mutableStateOf<String?>(null) }
+    var vFar by remember { mutableStateOf<Double?>(null) }
+    var vNear by remember { mutableStateOf<Double?>(null) }
 
-    var voltageText by rememberSaveable { mutableStateOf("") }
-    var voltageError by rememberSaveable { mutableStateOf<String?>(null) }
-    var chuanFromVoltageMm by rememberSaveable { mutableStateOf<Double?>(null) }
-    var endSideLabel by rememberSaveable { mutableStateOf<String?>(null) }
+    var voltageText by remember { mutableStateOf("") }
+    var voltageError by remember { mutableStateOf<String?>(null) }
+    var chuanFromVoltageMm by remember { mutableStateOf<Double?>(null) }
+    var endSideLabel by remember { mutableStateOf<String?>(null) }
+    var inputsLoaded by remember { mutableStateOf(false) }
 
-    androidx.compose.runtime.LaunchedEffect(settings.zeroVoltageV) {
+    LaunchedEffect(Unit) {
+        val obj = inputStore.load("probe")
+        if (obj != null) {
+            runCatching { ProbeMode.valueOf(obj.optString("mode", mode.name)) }.getOrNull()?.let { mode = it }
+            chuanText = obj.optString("chuanText", chuanText)
+            runCatching { ChuanUnit.valueOf(obj.optString("chuanUnit", chuanUnit.name)) }.getOrNull()?.let { chuanUnit = it }
+            voltageText = obj.optString("voltageText", voltageText)
+        }
+        inputsLoaded = true
+    }
+
+    LaunchedEffect(mode, chuanText, chuanUnit, voltageText, inputsLoaded) {
+        if (!inputsLoaded) return@LaunchedEffect
+        inputStore.save(
+            "probe",
+            JSONObject()
+                .put("mode", mode.name)
+                .put("chuanText", chuanText)
+                .put("chuanUnit", chuanUnit.name)
+                .put("voltageText", voltageText)
+        )
+    }
+
+    LaunchedEffect(settings.zeroVoltageV) {
         if (!loadedFromStore) {
             val v = settings.zeroVoltageV.coerceIn(0.0, 10.0)
             zeroVoltageV = v
@@ -275,6 +303,36 @@ fun ProbeCalcModule(
                     )
                 }
             }
+
+            SecondaryButton(
+                title = context.getString(R.string.restore_defaults),
+                onClick = {
+                    mode = ProbeMode.CHUAN
+                    chuanText = ""
+                    chuanUnit = ChuanUnit.MM
+                    inputError = null
+                    vFar = null
+                    vNear = null
+                    voltageText = ""
+                    voltageError = null
+                    chuanFromVoltageMm = null
+                    endSideLabel = null
+
+                    zeroMode = ZeroVoltageMode.PRESET
+                    presetExpanded = false
+                    presetSelectedV = 10.0
+                    zeroCustomText = ""
+                    zeroError = null
+                    loadedFromStore = false
+
+                    scope.launch {
+                        inputStore.clear("probe")
+                        settingsStore.setZeroVoltageV(ProbeCalculator.defaultZeroVoltage())
+                        onMessage(context.getString(R.string.restored_defaults))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             ProbeHistoryCard(
                 history = history,
