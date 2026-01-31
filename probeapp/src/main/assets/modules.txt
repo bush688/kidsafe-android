@@ -5,3 +5,4 @@ com.kidsafe.probe.modules.impl.RtdModule
 com.kidsafe.probe.modules.impl.ProbeModule
 com.kidsafe.probe.modules.impl.DpLevelModule
 com.kidsafe.probe.modules.impl.CableDropModule
+com.kidsafe.probe.modules.impl.SupportModule

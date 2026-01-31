@@ -1,0 +1,26 @@
+{
+  "categories": [
+    {
+      "id": "faq",
+      "title": "常见问题",
+      "items": [
+        { "id": "privacy", "title": "隐私同意与撤回", "path": "faq/privacy.md" },
+        { "id": "update", "title": "如何查看更新内容", "path": "faq/update.md" }
+      ]
+    },
+    {
+      "id": "tutorial",
+      "title": "功能教程",
+      "items": [
+        { "id": "dp_multi", "title": "差压液位计多点校正", "path": "tutorial/dp_multi.md" }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "故障排除",
+      "items": [
+        { "id": "install", "title": "安装失败/签名不一致", "path": "troubleshooting/install.md" }
+      ]
+    }
+  ]
+}

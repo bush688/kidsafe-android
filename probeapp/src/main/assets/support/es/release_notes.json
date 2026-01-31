@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "versionCode": 131,
+      "versionName": "1.0.131",
+      "date": "2026-01-31",
+      "title": "Sistema de soporte (Privacidad/Actualizaciones/Ayuda)",
+      "summary": "Consentimiento de privacidad, avisos de actualización y centro de ayuda sin conexión.",
+      "bodyMd": "## Añadido\\n\\n- Aviso de privacidad obligatorio al primer inicio (aceptar/rechazar)\\n- Centro de soporte: privacidad sin conexión, notas de versión, ayuda (con búsqueda), comentarios\\n- Avisos de actualización: obligatoria/opcional (según configuración)\\n\\n## Compatibilidad\\n\\n- Mínimo Android 6.0 (API 23)\\n"
+    },
+    {
+      "versionCode": 130,
+      "versionName": "1.0.130",
+      "date": "2026-01-31",
+      "title": "Calibración multipunto + Centro de soporte",
+      "summary": "Se añadió calibración multipunto para nivel DP y un centro de soporte.",
+      "bodyMd": "## Añadido\\n\\n- Nivel DP: calibración multipunto del rango (ajustar span o mantener span)\\n- Centro de soporte: política de privacidad, notas de versión, ayuda, comentarios\\n\\n## Corregido\\n\\n- Evita un posible fallo al pasar a segundo plano/bloquear pantalla\\n"
+    }
+  ]
+}

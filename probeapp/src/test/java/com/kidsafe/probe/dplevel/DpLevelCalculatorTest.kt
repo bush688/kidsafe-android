@@ -104,6 +104,52 @@ class DpLevelCalculatorTest {
     }
 
     @Test
+    fun fitRangeFromPoints_fitSpan_recoversLinearRange() {
+        val trueLrv = PressureUnit.KPA.toPa(-12.0)
+        val trueSpan = PressureUnit.KPA.toPa(120.0)
+        val points = listOf(10.0, 25.0, 80.0).map { pct ->
+            val x = pct / 100.0
+            DpLevelCalculator.CalPoint(
+                levelPercent = pct,
+                dpNowPa = trueLrv + x * trueSpan,
+            )
+        }
+        val out = DpLevelCalculator.fitRangeFromPoints(
+            lrv0Pa = PressureUnit.KPA.toPa(-10.0),
+            urv0Pa = PressureUnit.KPA.toPa(90.0),
+            points = points,
+            keepSpan = false,
+        )
+        assertRelativeWithin(out.lrvPa, trueLrv, 1e-12)
+        assertRelativeWithin(out.spanPa, trueSpan, 1e-12)
+        assertTrue(out.rmsePa <= 1e-9)
+    }
+
+    @Test
+    fun fitRangeFromPoints_keepSpan_averagesZeroShift() {
+        val lrv0 = PressureUnit.KPA.toPa(-10.0)
+        val urv0 = PressureUnit.KPA.toPa(90.0)
+        val span0 = urv0 - lrv0
+        val lrvShifted = PressureUnit.KPA.toPa(-7.0)
+        val points = listOf(10.0, 25.0, 80.0).map { pct ->
+            val x = pct / 100.0
+            DpLevelCalculator.CalPoint(
+                levelPercent = pct,
+                dpNowPa = lrvShifted + x * span0,
+            )
+        }
+        val out = DpLevelCalculator.fitRangeFromPoints(
+            lrv0Pa = lrv0,
+            urv0Pa = urv0,
+            points = points,
+            keepSpan = true,
+        )
+        assertRelativeWithin(out.spanPa, span0, 1e-12)
+        assertRelativeWithin(out.lrvPa, lrvShifted, 1e-12)
+        assertTrue(out.rmsePa <= 1e-9)
+    }
+
+    @Test
     fun pressureUnit_roundTrip() {
         val pa = 123_456.0
         PressureUnit.entries.forEach { u ->

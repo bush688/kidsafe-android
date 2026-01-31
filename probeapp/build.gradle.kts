@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId = "com.kidsafe.probe"
-        minSdk = 26
+        minSdk = 23
         targetSdk = 34
         versionCode = versionCodeFromFile
         versionName = versionNameFromFile
@@ -66,7 +66,10 @@ android {
         }
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
     composeOptions { kotlinCompilerExtensionVersion = "1.5.13" }
 
     packaging {
@@ -95,10 +98,15 @@ dependencies {
 
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     testImplementation("junit:junit:4.13.2")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
 val exportedApkDir = rootProject.layout.projectDirectory.dir(".build/apks")

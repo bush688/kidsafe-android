@@ -1,0 +1,19 @@
+{
+  "categories": [
+    {
+      "id": "faq",
+      "title": "FAQ",
+      "items": [
+        { "id": "privacy", "title": "Privacy consent", "path": "faq/privacy.md" },
+        { "id": "update", "title": "Viewing release notes", "path": "faq/update.md" }
+      ]
+    },
+    {
+      "id": "tutorial",
+      "title": "Tutorials",
+      "items": [
+        { "id": "dp_multi", "title": "DP level multi-point calibration", "path": "tutorial/dp_multi.md" }
+      ]
+    }
+  ]
+}

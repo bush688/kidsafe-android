@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_support">Centro de soporte</string>
+
+    <string name="loading">Cargando…</string>
+    <string name="agree">Aceptar</string>
+    <string name="decline">Rechazar</string>
+    <string name="later">Más tarde</string>
+    <string name="exit">Salir</string>
+
+    <string name="privacy_policy">Política de Privacidad</string>
+    <string name="privacy_required_hint">Debes aceptar para continuar.</string>
+    <string name="privacy_status_accepted">Aceptado (%1$s)</string>
+    <string name="privacy_status_not_accepted">No aceptado</string>
+    <string name="withdraw_consent">Retirar</string>
+    <string name="withdrawn">Retirado</string>
+
+    <string name="update_required_title">Actualización obligatoria</string>
+    <string name="update_required_desc">Esta versión es demasiado antigua. Actualiza para continuar.</string>
+    <string name="update_available_title">Hay una actualización</string>
+    <string name="update_optional_desc">Puedes actualizar más tarde o ver detalles en el Centro de soporte.</string>
+    <string name="open_store">Abrir tienda</string>
+    <string name="update_status">Actual: %1$d; Última: %2$d; Mín: %3$d</string>
+
+    <string name="support_tab_privacy">Privacidad</string>
+    <string name="support_tab_release">Actualizaciones</string>
+    <string name="support_tab_help">Ayuda</string>
+    <string name="support_tab_feedback">Comentarios</string>
+
+    <string name="release_notes">Notas de versión</string>
+    <string name="view_details">Ver detalles</string>
+    <string name="help_center">Centro de ayuda</string>
+    <string name="search">Buscar</string>
+    <string name="search_results">Resultados</string>
+    <string name="hint_help_search">Buscar por palabra clave</string>
+
+    <string name="feedback">Comentarios</string>
+    <string name="send_email">Enviar correo</string>
+    <string name="copy_version_info">Copiar versión</string>
+    <string name="feedback_hint">Versión: %1$s (%2$d)</string>
+    <string name="feedback_email_subject">Comentarios (%1$s)</string>
+</resources>
+

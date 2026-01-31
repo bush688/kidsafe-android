@@ -1,0 +1,19 @@
+{
+  "categories": [
+    {
+      "id": "faq",
+      "title": "Preguntas frecuentes",
+      "items": [
+        { "id": "privacy", "title": "Consentimiento de privacidad", "path": "faq/privacy.md" },
+        { "id": "update", "title": "Ver notas de versión", "path": "faq/update.md" }
+      ]
+    },
+    {
+      "id": "tutorial",
+      "title": "Tutoriales",
+      "items": [
+        { "id": "dp_multi", "title": "Calibración multipunto (nivel DP)", "path": "tutorial/dp_multi.md" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_support">Support Center</string>
+
+    <string name="loading">Loading…</string>
+    <string name="agree">Agree</string>
+    <string name="decline">Decline</string>
+    <string name="later">Later</string>
+    <string name="exit">Exit</string>
+
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_required_hint">You must agree to continue.</string>
+    <string name="privacy_status_accepted">Accepted (%1$s)</string>
+    <string name="privacy_status_not_accepted">Not accepted</string>
+    <string name="withdraw_consent">Withdraw</string>
+    <string name="withdrawn">Withdrawn</string>
+
+    <string name="update_required_title">Update required</string>
+    <string name="update_required_desc">This version is too old. Please update to continue.</string>
+    <string name="update_available_title">Update available</string>
+    <string name="update_optional_desc">You can update later, or view details in Support Center.</string>
+    <string name="open_store">Open store</string>
+    <string name="update_status">Current: %1$d; Latest: %2$d; Min: %3$d</string>
+
+    <string name="support_tab_privacy">Privacy</string>
+    <string name="support_tab_release">Updates</string>
+    <string name="support_tab_help">Help</string>
+    <string name="support_tab_feedback">Feedback</string>
+
+    <string name="release_notes">Release Notes</string>
+    <string name="view_details">View details</string>
+    <string name="help_center">Help Center</string>
+    <string name="search">Search</string>
+    <string name="search_results">Results</string>
+    <string name="hint_help_search">Search docs by keyword</string>
+
+    <string name="feedback">Feedback</string>
+    <string name="send_email">Send email</string>
+    <string name="copy_version_info">Copy version info</string>
+    <string name="feedback_hint">Version: %1$s (%2$d)</string>
+    <string name="feedback_email_subject">Feedback (%1$s)</string>
+</resources>
+

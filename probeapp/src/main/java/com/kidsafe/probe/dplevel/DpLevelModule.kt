@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,6 +38,7 @@ import com.kidsafe.probe.R
 import com.kidsafe.probe.ui.ChoiceButton
 import com.kidsafe.probe.ui.SecondaryButton
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
 
@@ -79,7 +82,18 @@ fun DpLevelModule(
 
     var errorText by remember { mutableStateOf<String?>(null) }
     var result by remember { mutableStateOf<DpLevelResult?>(null) }
+    var calibrationDetails by remember { mutableStateOf<String?>(null) }
     var inputsLoaded by remember { mutableStateOf(false) }
+
+    var recalcPointMode by remember { mutableStateOf("multi") }
+    var recalcFitSpan by remember { mutableStateOf(true) }
+    val recalcPoints = remember {
+        mutableStateListOf(
+            CalPointState("10", "0"),
+            CalPointState("25", "0"),
+            CalPointState("80", "0"),
+        )
+    }
 
     LaunchedEffect(Unit) {
         val obj = inputStore.load("dp_level")
@@ -99,6 +113,23 @@ fun DpLevelModule(
             dpNowText = obj.optString("dpNowText", dpNowText)
             runCatching { PressureUnit.valueOf(obj.optString("dpUnit", dpUnit.name)) }.getOrNull()?.let { dpUnit = it }
             runCatching { PressureUnit.valueOf(obj.optString("outputUnit", outputUnit.name)) }.getOrNull()?.let { outputUnit = it }
+            recalcPointMode = obj.optString("recalcPointMode", recalcPointMode).ifBlank { recalcPointMode }
+            recalcFitSpan = obj.optBoolean("recalcFitSpan", recalcFitSpan)
+            val arr = obj.optJSONArray("recalcPoints")
+            if (arr != null) {
+                recalcPoints.clear()
+                for (i in 0 until arr.length()) {
+                    val pObj = arr.optJSONObject(i) ?: continue
+                    val pText = pObj.optString("p", "")
+                    val dpText = pObj.optString("dp", "")
+                    if (pText.isNotBlank() || dpText.isNotBlank()) {
+                        recalcPoints.add(CalPointState(pText.ifBlank { "0" }, dpText.ifBlank { "0" }))
+                    }
+                }
+                if (recalcPoints.isEmpty()) {
+                    recalcPoints.add(CalPointState(levelPercentText, dpNowText))
+                }
+            }
         }
         inputsLoaded = true
     }
@@ -119,9 +150,20 @@ fun DpLevelModule(
         dpNowText,
         dpUnit,
         outputUnit,
+        recalcPointMode,
+        recalcFitSpan,
+        recalcPoints.size,
         inputsLoaded,
     ) {
         if (!inputsLoaded) return@LaunchedEffect
+        val pointsArr = JSONArray()
+        recalcPoints.forEach { p ->
+            pointsArr.put(
+                JSONObject()
+                    .put("p", p.percentText)
+                    .put("dp", p.dpText)
+            )
+        }
         inputStore.save(
             "dp_level",
             JSONObject()
@@ -140,6 +182,9 @@ fun DpLevelModule(
                 .put("dpNowText", dpNowText)
                 .put("dpUnit", dpUnit.name)
                 .put("outputUnit", outputUnit.name)
+                .put("recalcPointMode", recalcPointMode)
+                .put("recalcFitSpan", recalcFitSpan)
+                .put("recalcPoints", pointsArr)
         )
     }
 
@@ -307,24 +352,155 @@ fun DpLevelModule(
                     onUnitChange = { dpUnit = it; errorText = null; result = null },
                     allowNegative = true,
                 )
-                OutlinedTextField(
-                    value = levelPercentText,
-                    onValueChange = { levelPercentText = filterNumber(it, allowNegative = false); errorText = null; result = null },
+
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text = context.getString(R.string.dp_level_level_percent)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    suffix = { Text(text = "%") },
-                    supportingText = { Text(text = context.getString(R.string.hint_dp_level_level_percent)) },
-                )
-                PressureInputRow(
-                    title = context.getString(R.string.dp_level_dp_now),
-                    hint = context.getString(R.string.hint_dp_level_dp_now),
-                    valueText = dpNowText,
-                    onValueTextChange = { dpNowText = it; errorText = null; result = null },
-                    unit = dpUnit,
-                    onUnitChange = { dpUnit = it; errorText = null; result = null },
-                    allowNegative = true,
-                )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    ChoiceButton(
+                        title = context.getString(R.string.dp_level_recalc_single),
+                        hint = context.getString(R.string.hint_dp_level_recalc_single),
+                        selected = recalcPointMode == "single",
+                        onClick = {
+                            recalcPointMode = "single"
+                            calibrationDetails = null
+                            result = null
+                            errorText = null
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                    ChoiceButton(
+                        title = context.getString(R.string.dp_level_recalc_multi),
+                        hint = context.getString(R.string.hint_dp_level_recalc_multi),
+                        selected = recalcPointMode == "multi",
+                        onClick = {
+                            recalcPointMode = "multi"
+                            if (recalcPoints.isEmpty()) {
+                                recalcPoints.add(CalPointState(levelPercentText, dpNowText))
+                            }
+                            calibrationDetails = null
+                            result = null
+                            errorText = null
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                if (recalcPointMode == "single") {
+                    OutlinedTextField(
+                        value = levelPercentText,
+                        onValueChange = { levelPercentText = filterNumber(it, allowNegative = false); errorText = null; result = null; calibrationDetails = null },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(text = context.getString(R.string.dp_level_level_percent)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        suffix = { Text(text = "%") },
+                        supportingText = { Text(text = context.getString(R.string.hint_dp_level_level_percent)) },
+                    )
+                    PressureInputRow(
+                        title = context.getString(R.string.dp_level_dp_now),
+                        hint = context.getString(R.string.hint_dp_level_dp_now),
+                        valueText = dpNowText,
+                        onValueTextChange = { dpNowText = it; errorText = null; result = null; calibrationDetails = null },
+                        unit = dpUnit,
+                        onUnitChange = { dpUnit = it; errorText = null; result = null; calibrationDetails = null },
+                        allowNegative = true,
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        ChoiceButton(
+                            title = context.getString(R.string.dp_level_recalc_fit_span),
+                            hint = context.getString(R.string.hint_dp_level_recalc_fit_span),
+                            selected = recalcFitSpan,
+                            onClick = {
+                                recalcFitSpan = true
+                                calibrationDetails = null
+                                result = null
+                                errorText = null
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        ChoiceButton(
+                            title = context.getString(R.string.dp_level_recalc_keep_span),
+                            hint = context.getString(R.string.hint_dp_level_recalc_keep_span),
+                            selected = !recalcFitSpan,
+                            onClick = {
+                                recalcFitSpan = false
+                                calibrationDetails = null
+                                result = null
+                                errorText = null
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Text(
+                        text = context.getString(R.string.hint_dp_level_recalc_points, dpUnit.displayName),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    recalcPoints.forEachIndexed { index, p ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            OutlinedTextField(
+                                value = p.percentText,
+                                onValueChange = { next ->
+                                    p.percentText = filterNumber(next, allowNegative = false)
+                                    calibrationDetails = null
+                                    result = null
+                                    errorText = null
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = { Text(text = context.getString(R.string.dp_level_point_percent, index + 1)) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                suffix = { Text(text = "%") },
+                            )
+                            OutlinedTextField(
+                                value = p.dpText,
+                                onValueChange = { next ->
+                                    p.dpText = filterNumber(next, allowNegative = true)
+                                    calibrationDetails = null
+                                    result = null
+                                    errorText = null
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = { Text(text = context.getString(R.string.dp_level_point_dp, index + 1)) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                suffix = { Text(text = dpUnit.displayName) },
+                            )
+                            IconButton(
+                                onClick = {
+                                    if (recalcPoints.size > 1) {
+                                        recalcPoints.removeAt(index)
+                                        calibrationDetails = null
+                                        result = null
+                                        errorText = null
+                                    }
+                                },
+                                enabled = recalcPoints.size > 1
+                            ) {
+                                Icon(Icons.Default.Delete, contentDescription = context.getString(R.string.delete))
+                            }
+                        }
+                    }
+
+                    SecondaryButton(
+                        title = context.getString(R.string.dp_level_add_point),
+                        onClick = {
+                            recalcPoints.add(CalPointState("0", "0"))
+                            calibrationDetails = null
+                            result = null
+                            errorText = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             Row(
@@ -348,26 +524,56 @@ fun DpLevelModule(
                                 val levelPercent = levelPercentText.toDoubleOrNull()
                                 val dpNowPa = dpUnit.toPa(dpNowText.toDoubleOrNull() ?: Double.NaN)
 
-                                val out = DpLevelCalculator.compute(
-                                    DpLevelInput(
-                                        instrument = instrument,
-                                        mode = mode,
-                                        mediumDensityKgM3 = mediumDensity,
-                                        oilDensityKgM3 = oilDensity,
-                                        spanHeightM = spanHeightM,
-                                        zeroShiftDirection = zeroShiftDirection,
-                                        zeroShiftMediumM = zeroShiftM,
-                                        oilEquivalentHeightM = oilHeightM,
-                                        dpLrvPa = if (mode == DpLevelMode.RECALC_RANGE) lrvPa else null,
-                                        dpUrvPa = if (mode == DpLevelMode.RECALC_RANGE) urvPa else null,
-                                        levelPercent = if (mode == DpLevelMode.RECALC_RANGE) levelPercent else null,
-                                        dpNowPa = if (mode == DpLevelMode.RECALC_RANGE) dpNowPa else null,
+                                val out: DpLevelResult
+                                if (mode == DpLevelMode.RECALC_RANGE && recalcPointMode == "multi") {
+                                    val points = recalcPoints.mapNotNull { p ->
+                                        val pct = p.percentText.toDoubleOrNull()
+                                        val dp = p.dpText.toDoubleOrNull()
+                                        if (pct == null || dp == null) null else DpLevelCalculator.CalPoint(pct, dpUnit.toPa(dp))
+                                    }
+                                    val fit = DpLevelCalculator.fitRangeFromPoints(
+                                        lrv0Pa = lrvPa,
+                                        urv0Pa = urvPa,
+                                        points = points,
+                                        keepSpan = !recalcFitSpan,
                                     )
-                                )
+                                    out = DpLevelResult(
+                                        mediumDensityKgM3 = Double.NaN,
+                                        lrvPa = fit.lrvPa,
+                                        urvPa = fit.urvPa,
+                                        spanPa = fit.spanPa,
+                                    )
+                                    if (fit.lrvPa.isFinite() && fit.urvPa.isFinite() && fit.spanPa.isFinite()) {
+                                        val rmse = formatPressure(outputUnit.fromPa(fit.rmsePa), outputUnit)
+                                        val maxAbs = formatPressure(outputUnit.fromPa(fit.maxAbsErrorPa), outputUnit)
+                                        calibrationDetails = context.getString(R.string.dp_level_fit_stats, rmse, maxAbs)
+                                    } else {
+                                        calibrationDetails = null
+                                    }
+                                } else {
+                                    out = DpLevelCalculator.compute(
+                                        DpLevelInput(
+                                            instrument = instrument,
+                                            mode = mode,
+                                            mediumDensityKgM3 = mediumDensity,
+                                            oilDensityKgM3 = oilDensity,
+                                            spanHeightM = spanHeightM,
+                                            zeroShiftDirection = zeroShiftDirection,
+                                            zeroShiftMediumM = zeroShiftM,
+                                            oilEquivalentHeightM = oilHeightM,
+                                            dpLrvPa = if (mode == DpLevelMode.RECALC_RANGE) lrvPa else null,
+                                            dpUrvPa = if (mode == DpLevelMode.RECALC_RANGE) urvPa else null,
+                                            levelPercent = if (mode == DpLevelMode.RECALC_RANGE) levelPercent else null,
+                                            dpNowPa = if (mode == DpLevelMode.RECALC_RANGE) dpNowPa else null,
+                                        )
+                                    )
+                                    calibrationDetails = null
+                                }
                                 val invalid = out.lrvPa.isNaN() || out.urvPa.isNaN() || out.spanPa.isNaN()
                                 if (invalid) {
                                     errorText = context.getString(R.string.invalid_input)
                                     result = null
+                                    calibrationDetails = null
                                     return@SecondaryButton
                                 }
                                 result = out
@@ -381,14 +587,16 @@ fun DpLevelModule(
                                     outputUnit = outputUnit,
                                     spanHeightM = spanHeightM,
                                     zeroShiftM = zeroShiftM,
-                                    levelPercent = levelPercent,
+                                    levelPercent = if (mode == DpLevelMode.RECALC_RANGE && recalcPointMode == "multi") null else levelPercent,
                                     dpNowPa = dpNowPa,
+                                    calibrationDetails = calibrationDetails,
                                 )
                                 scope.launch { historyStore.add(record) }
                             } catch (e: Exception) {
                                 Log.e("DpLevelModule", "Calc failed", e)
                                 errorText = context.getString(R.string.calc_failed)
                                 result = null
+                                calibrationDetails = null
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -413,6 +621,17 @@ fun DpLevelModule(
                             outputUnit = PressureUnit.KPA
                             errorText = null
                             result = null
+                            calibrationDetails = null
+                            recalcPointMode = "multi"
+                            recalcFitSpan = true
+                            recalcPoints.clear()
+                            recalcPoints.addAll(
+                                listOf(
+                                    CalPointState("10", "0"),
+                                    CalPointState("25", "0"),
+                                    CalPointState("80", "0"),
+                                )
+                            )
                             scope.launch {
                                 inputStore.clear("dp_level")
                                 onMessage(context.getString(R.string.restored_defaults))
@@ -431,7 +650,7 @@ fun DpLevelModule(
                     IconButton(
                         onClick = {
                             val r = result ?: return@IconButton
-                            val text = buildCopyText(context, instrument, mode, r, outputUnit)
+                            val text = buildCopyText(context, instrument, mode, r, outputUnit, calibrationDetails)
                             scope.launch { onCopy(text) }
                         },
                         enabled = result != null
@@ -476,6 +695,10 @@ fun DpLevelModule(
                 value = r?.let {
                     if (it.mediumDensityKgM3.isNaN()) "—" else "${formatNumber4(it.mediumDensityKgM3)} ${context.getString(R.string.unit_kg_m3)}"
                 }
+            )
+            ResultRow(
+                title = context.getString(R.string.dp_level_fit_detail_title),
+                value = calibrationDetails,
             )
 
             HistoryCard(
@@ -727,6 +950,7 @@ private fun buildCopyText(
     mode: DpLevelMode,
     out: DpLevelResult,
     unit: PressureUnit,
+    calibrationDetails: String?,
 ): String {
     val inst = if (instrument == DpLevelInstrument.DUAL_FLANGE) context.getString(R.string.dp_level_instrument_dual) else context.getString(R.string.dp_level_instrument_dp)
     val modeName = if (mode == DpLevelMode.RHO_AND_HEIGHT) context.getString(R.string.dp_level_mode_rho_height) else context.getString(R.string.dp_level_mode_recalc)
@@ -738,6 +962,9 @@ private fun buildCopyText(
         appendLine("${context.getString(R.string.dp_level_lrv_out)}：${formatPressure(unit.fromPa(out.lrvPa), unit)}")
         appendLine("${context.getString(R.string.dp_level_urv_out)}：${formatPressure(unit.fromPa(out.urvPa), unit)}")
         appendLine("${context.getString(R.string.dp_level_span_kpa)}：${formatPressure(unit.fromPa(out.spanPa), unit)}")
+        if (!calibrationDetails.isNullOrBlank()) {
+            appendLine("${context.getString(R.string.dp_level_fit_detail_title)}：$calibrationDetails")
+        }
     }.trim()
 }
 
@@ -751,6 +978,7 @@ private fun buildHistoryLine(
     zeroShiftM: Double,
     levelPercent: Double?,
     dpNowPa: Double,
+    calibrationDetails: String?,
 ): String {
     val instShort = if (instrument == DpLevelInstrument.DUAL_FLANGE) "双法兰" else "差压"
     val modeShort = if (mode == DpLevelMode.RHO_AND_HEIGHT) "ρ+H" else "校准"
@@ -758,6 +986,21 @@ private fun buildHistoryLine(
         "$instShort/$modeShort  H=${formatNumber4(spanHeightM)}m  h0=${formatNumber4(zeroShiftM)}m  ρ=${formatNumber4(out.mediumDensityKgM3)}  LRV=${formatPressure(outputUnit.fromPa(out.lrvPa), outputUnit)}  URV=${formatPressure(outputUnit.fromPa(out.urvPa), outputUnit)}"
     } else {
         val pct = levelPercent ?: Double.NaN
-        "$instShort/$modeShort  %=${formatNumber4(pct)}  ΔPnow=${formatPressure(outputUnit.fromPa(dpNowPa), outputUnit)}  LRV=${formatPressure(outputUnit.fromPa(out.lrvPa), outputUnit)}  URV=${formatPressure(outputUnit.fromPa(out.urvPa), outputUnit)}"
+        val head = if (pct.isNaN()) "$instShort/$modeShort  多点" else "$instShort/$modeShort  %=${formatNumber4(pct)}"
+        buildString {
+            append(head)
+            append("  ΔPnow=${formatPressure(outputUnit.fromPa(dpNowPa), outputUnit)}")
+            append("  LRV=${formatPressure(outputUnit.fromPa(out.lrvPa), outputUnit)}")
+            append("  URV=${formatPressure(outputUnit.fromPa(out.urvPa), outputUnit)}")
+            if (!calibrationDetails.isNullOrBlank()) append("  $calibrationDetails")
+        }
     }
+}
+
+private class CalPointState(
+    percentText: String,
+    dpText: String,
+) {
+    var percentText by mutableStateOf(percentText)
+    var dpText by mutableStateOf(dpText)
 }

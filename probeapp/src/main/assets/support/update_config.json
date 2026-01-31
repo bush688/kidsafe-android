@@ -1,0 +1,10 @@
+{
+  "latestVersionCode": 131,
+  "minSupportedVersionCode": 120,
+  "storeUrl": "https://play.google.com/store/apps/details?id=com.kidsafe.probe",
+  "summary": {
+    "zh": "新增差压液位计多点校正与支持中心（隐私/更新/帮助）。",
+    "en": "Added multi-point calibration and support center (privacy, updates, help).",
+    "es": "Se añadió calibración multipunto y centro de ayuda (privacidad, actualizaciones, ayuda)."
+  }
+}

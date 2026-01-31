@@ -61,6 +61,45 @@
     <string name="feature_probe">探头窜量/电压</string>
     <string name="feature_dp_level">差压液位计</string>
     <string name="feature_cable_drop">电缆线阻/压降</string>
+    <string name="feature_support">支持中心</string>
+
+    <string name="loading">加载中…</string>
+    <string name="agree">同意</string>
+    <string name="decline">拒绝</string>
+    <string name="later">稍后</string>
+    <string name="exit">退出</string>
+
+    <string name="privacy_policy">隐私政策</string>
+    <string name="privacy_required_hint">继续使用需要同意隐私政策。</string>
+    <string name="privacy_status_accepted">已同意（%1$s）</string>
+    <string name="privacy_status_not_accepted">未同意</string>
+    <string name="withdraw_consent">撤回同意</string>
+    <string name="withdrawn">已撤回</string>
+
+    <string name="update_required_title">需要更新</string>
+    <string name="update_required_desc">当前版本过旧，需要更新后才能继续使用。</string>
+    <string name="update_available_title">发现新版本</string>
+    <string name="update_optional_desc">你可以稍后更新，或在支持中心查看详细更新内容。</string>
+    <string name="open_store">打开应用商店</string>
+    <string name="update_status">当前版本：%1$d；最新：%2$d；最低可用：%3$d</string>
+
+    <string name="support_tab_privacy">隐私</string>
+    <string name="support_tab_release">更新</string>
+    <string name="support_tab_help">帮助</string>
+    <string name="support_tab_feedback">反馈</string>
+
+    <string name="release_notes">更新日志</string>
+    <string name="view_details">查看详情</string>
+    <string name="help_center">帮助中心</string>
+    <string name="search">搜索</string>
+    <string name="search_results">搜索结果</string>
+    <string name="hint_help_search">输入关键词，快速定位文档</string>
+
+    <string name="feedback">用户反馈</string>
+    <string name="send_email">发送邮件</string>
+    <string name="copy_version_info">复制版本信息</string>
+    <string name="feedback_hint">版本：%1$s（%2$d）</string>
+    <string name="feedback_email_subject">反馈（%1$s）</string>
 
     <string name="tab_cable_resistance">线阻</string>
     <string name="tab_cable_drop">电压降</string>
@@ -232,6 +271,24 @@
     <string name="hint_dp_level_level_percent">当前真实液位百分比（0–100%）</string>
     <string name="dp_level_dp_now">当前差压</string>
     <string name="hint_dp_level_dp_now">当前仪表测得差压（静压差）</string>
+
+    <string name="dp_level_recalc_single">单点校正</string>
+    <string name="hint_dp_level_recalc_single">用 1 个点重算零点（跨度保持不变）</string>
+    <string name="dp_level_recalc_multi">多点校正</string>
+    <string name="hint_dp_level_recalc_multi">用多个点拟合量程上下限（更适合 A/B 对标）</string>
+
+    <string name="dp_level_recalc_fit_span">拟合跨度</string>
+    <string name="hint_dp_level_recalc_fit_span">同时拟合 LRV 与跨度（推荐）</string>
+    <string name="dp_level_recalc_keep_span">固定跨度</string>
+    <string name="hint_dp_level_recalc_keep_span">只修零点，跨度使用原 URV-LRV</string>
+
+    <string name="dp_level_point_percent">点%%（#%1$d）</string>
+    <string name="dp_level_point_dp">差压（#%1$d）</string>
+    <string name="dp_level_add_point">添加校正点</string>
+    <string name="hint_dp_level_recalc_points">说明：每个点填“参考液位%%（如 A）”与“B 的当前差压 ΔPnow（%1$s）”。</string>
+
+    <string name="dp_level_fit_detail_title">拟合误差</string>
+    <string name="dp_level_fit_stats">RMSE=%1$s，最大误差=%2$s</string>
 
     <string name="dp_level_output_unit">输出单位</string>
     <string name="hint_dp_level_output_unit">选择结果输出单位（kPa/mmH₂O/bar 等）</string>

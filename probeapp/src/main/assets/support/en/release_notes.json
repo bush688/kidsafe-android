@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "versionCode": 131,
+      "versionName": "1.0.131",
+      "date": "2026-01-31",
+      "title": "Privacy/Updates/Help support system",
+      "summary": "First-launch privacy consent, update prompts, and offline help center.",
+      "bodyMd": "## Added\\n\\n- Mandatory privacy notice on first launch (agree/decline)\\n- Support Center: offline privacy policy, release notes, help docs (with search), feedback\\n- Update prompts: forced/optional update (config-based)\\n\\n## Compatibility\\n\\n- Minimum Android 6.0 (API 23)\\n"
+    },
+    {
+      "versionCode": 130,
+      "versionName": "1.0.130",
+      "date": "2026-01-31",
+      "title": "Multi-point calibration + Support Center",
+      "summary": "Added multi-point calibration for DP level and a support center entry.",
+      "bodyMd": "## Added\\n\\n- DP level: multi-point range calibration (fit span or keep span)\\n- Support Center: privacy policy, release notes, help docs, feedback\\n\\n## Fixed\\n\\n- Prevent possible background/lockscreen state-save crash\\n"
+    }
+  ]
+}
